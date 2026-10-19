@@ -34,8 +34,11 @@ class NavigationEngine:
     def register_mock(self, url: str, html_body: str):
         self._mock_responses[url] = html_body
 
-    def fetch(self, url: str) -> DOMSnapshot:
+    def fetch(self, url: str, allowed_host: str | None = None) -> DOMSnapshot:
         timestamp_utc = datetime.now(timezone.utc).isoformat()
+        normalized_allowed_host = (
+            allowed_host.rstrip(".").lower() if allowed_host else None
+        )
 
         if url in self._mock_responses:
             html = self._mock_responses[url]
@@ -64,8 +67,18 @@ class NavigationEngine:
 
                     next_url = urljoin(current_url, location)
                     # Validate BEFORE following so a public URL cannot redirect
-                    # the agent into localhost, metadata services, or RFC1918.
+                    # the agent into localhost, metadata services, RFC1918, or
+                    # a different public domain when same-site navigation is
+                    # required by the caller.
                     self.url_policy.validate(next_url)
+                    if normalized_allowed_host:
+                        from urllib.parse import urlparse
+
+                        redirect_host = (
+                            (urlparse(next_url).hostname or "").rstrip(".").lower()
+                        )
+                        if redirect_host != normalized_allowed_host:
+                            raise URLPolicyError("CROSS_DOMAIN_REDIRECT_BLOCKED")
                     current_url = next_url
                 else:
                     raise RuntimeError("TOO_MANY_REDIRECTS")
