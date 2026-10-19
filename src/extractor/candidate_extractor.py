@@ -66,7 +66,11 @@ class CandidateExtractor:
 
     def extract(self, html: str, cleaned_text: str, intent) -> List[Candidate]:
         candidates: List[Candidate] = []
-        candidates.extend(self._from_text(cleaned_text, intent))
+        block_candidates = self._from_html_blocks(html, intent)
+        if block_candidates:
+            candidates.extend(block_candidates)
+        else:
+            candidates.extend(self._from_text(cleaned_text, intent))
         candidates.extend(self._from_tables(html, intent))
         candidates.extend(self._from_json_ld(html, intent))
         candidates.extend(self._from_contact_links(html, intent))
@@ -98,6 +102,34 @@ class CandidateExtractor:
                     )
                 )
         return found
+
+    def _from_html_blocks(self, html: str, intent) -> List[Candidate]:
+        """Extract candidates within semantic HTML blocks to avoid cross-block leakage."""
+        try:
+            from bs4 import BeautifulSoup
+
+            soup = BeautifulSoup(html, "html.parser")
+            blocks = []
+            for node in soup.find_all(
+                ["p", "li", "dd", "dt", "h1", "h2", "h3", "h4", "h5", "h6", "td", "th"]
+            ):
+                text = re.sub(r"\s+", " ", node.get_text(" ", strip=True)).strip()
+                if text:
+                    blocks.append(text)
+        except ImportError:
+            blocks = [
+                re.sub(r"<[^>]+>", " ", match.group(1)).strip()
+                for match in re.finditer(
+                    r"<(?:p|li|dd|dt|h[1-6]|td|th)\b[^>]*>(.*?)</(?:p|li|dd|dt|h[1-6]|td|th)>",
+                    html,
+                    flags=re.IGNORECASE | re.DOTALL,
+                )
+            ]
+
+        out: List[Candidate] = []
+        for block in blocks:
+            out.extend(self._from_text(block, intent))
+        return out
 
     def _from_tables(self, html: str, intent) -> List[Candidate]:
         out: List[Candidate] = []
@@ -202,9 +234,7 @@ class CandidateExtractor:
         value = re.sub(r"\s+", " ", value).strip()
         if attr == "version":
             value = re.sub(r"^(?:version\s+|v(?=\d))", "", value, flags=re.IGNORECASE)
-        if attr == "phone":
-            value = value.strip(" .,;:")
-        if attr == "email":
+        if attr in {"phone", "email", "person"}:
             value = value.strip(" .,;:")
         return value
 
