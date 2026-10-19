@@ -39,7 +39,11 @@ class SearchEngine:
             for index, url in enumerate(urls)
         ]
 
-    def search(self, query: str) -> List[SearchResult]:
+    def search(
+        self,
+        query: str,
+        timeout_seconds: float | None = None,
+    ) -> List[SearchResult]:
         normalized = query.strip()
         if not normalized:
             return []
@@ -59,7 +63,11 @@ class SearchEngine:
                         "+https://github.com/Rafa-Innerchispa)"
                     )
                 },
-                timeout=self.timeout_seconds,
+                timeout=(
+                    self.timeout_seconds
+                    if timeout_seconds is None
+                    else min(self.timeout_seconds, max(0.001, timeout_seconds))
+                ),
             )
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
