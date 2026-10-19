@@ -180,8 +180,8 @@ class CandidateExtractor:
         labels = r"(?:CEO|chief executive officer|founder|co-founder|author|creator|director|president)"
         pattern = re.compile(
             labels
-            + r"\\s*(?:is|:|-)?\\s*"
-            + r"([A-Z][A-Za-z.'’-]+(?:\\s+[A-Z][A-Za-z.'’-]+){1,3})",
+            + r"\s*(?:is|:|-)?\s*"
+            + r"([A-Z][A-Za-z.'’-]+(?:\s+[A-Z][A-Za-z.'’-]+){1,3})",
             re.IGNORECASE,
         )
         out: List[Candidate] = []
@@ -199,9 +199,9 @@ class CandidateExtractor:
         return out
 
     def _normalize_value(self, value: str, attr: str) -> str:
-        value = re.sub(r"\\s+", " ", value).strip()
+        value = re.sub(r"\s+", " ", value).strip()
         if attr == "version":
-            value = re.sub(r"^(?:version\\s+|v(?=\\d))", "", value, flags=re.IGNORECASE)
+            value = re.sub(r"^(?:version\s+|v(?=\d))", "", value, flags=re.IGNORECASE)
         if attr == "phone":
             value = value.strip(" .,;:")
         if attr == "email":
@@ -277,7 +277,7 @@ class CandidateExtractor:
         boundaries = [0]
         boundaries.extend(
             match.end()
-            for match in re.finditer(r"[.!?](?=\\s|$)", text)
+            for match in re.finditer(r"[.!?](?=\s|$)", text)
         )
         if boundaries[-1] != len(text):
             boundaries.append(len(text))
