@@ -31,6 +31,7 @@ Implemented on the development branch:
 - bounded wall-clock retrieval budget
 - atomic JSON output helpers
 - provisional `/app/app.py` grader adapter
+- common grader CLI aliases (`-q`, `--input-file`, `--tasks`) for compatibility without changing fail-closed semantics
 - isolated product/demo UI under `demo/`
 - provisional ROCm programme-level Docker baseline
 - repeatable offline validation and image-release runbooks
@@ -39,14 +40,14 @@ Implemented on the development branch:
 
 Development validation on the current implementation:
 
-- **63 tests passed**
+- **65 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
 - offline retrieval benchmark: **all current cases PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39324279750)
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39342544907)
 
 - exact-case accuracy: **1.0**
-- CI mocked benchmark p50: **2.167 ms**
-- CI mocked benchmark p95: **3.837 ms**
+- CI mocked benchmark p50: **2.109 ms**
+- CI mocked benchmark p95: **3.742 ms**
 - adversarial coverage: JSON/API responses, structured prompt injection, cross-domain redirects, absolute deadline enforcement, fragment deduplication, decoy-link backtracking, and current-vs-stale conflicting values
 
 Evidence:
