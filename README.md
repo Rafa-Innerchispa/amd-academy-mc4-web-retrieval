@@ -13,20 +13,20 @@ This repository is now an active Match 4 implementation rather than a scaffold.
 
 Implemented on the development branch:
 
-- bounded same-domain navigation with loop prevention
+- bounded best-first same-domain navigation with loop prevention and dead-end backtracking
 - URL + visible-anchor ranking for opaque links
 - deterministic intent parsing
 - context-ranked exact-value extraction
 - prices, dates, versions, email, phone, opening hours, counts, people and technical values
 - HTML table extraction
-- JSON-LD extraction
+- JSON-LD and raw JSON/API response extraction
 - mailto/tel extraction
 - exact/fuzzy evidence verification
 - raw-HTML grounding for structured data
 - SHA-256 provenance with coordinate-space tracking
 - fail-closed behavior when evidence is insufficient
 - SSRF/private/link-local/loopback blocking by default
-- redirect validation before following
+- redirect validation before following, including cross-domain redirect escape blocking
 - explicit allowlist for grader-provided internal hosts
 - bounded wall-clock retrieval budget
 - atomic JSON output helpers
@@ -39,17 +39,19 @@ Implemented on the development branch:
 
 Development validation on the current implementation:
 
-- **40 tests passed**
+- **52 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
-- offline retrieval benchmark: **9/9 cases PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39315320387, network disabled, fail-closed adapter output, no demo TCP port)
+- offline retrieval benchmark: **12/12 cases PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39323157430)
 
 - exact-case accuracy: **1.0**
-- CI mocked benchmark p50: **1.416 ms**
-- CI mocked benchmark p95: **35.885 ms**
+- CI mocked benchmark p50: **0.98 ms**
+- CI mocked benchmark p95: **1.515 ms**
+- new adversarial coverage: JSON API responses, structured prompt injection, cross-domain redirects and decoy-link backtracking
 
 Evidence:
 
+- `evidence/ci_validation_20261019.json`
 - `evidence/local_pytest_20261019.json`
 - `evidence/offline_benchmark_20261019.json`
 
@@ -72,6 +74,7 @@ Natural-language request
           ├── clean text
           ├── tables
           ├── JSON-LD
+          ├── raw JSON / APIs
           └── mailto / tel
           │
           ▼
