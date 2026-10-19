@@ -31,3 +31,19 @@ def test_planner_bounds_and_loop_prevention():
     links_step4 = ["https://example.com/end"]
     step4 = planner.select_next_step(step3.target_url, links_step4, intent)
     assert step4 is None
+
+
+def test_planner_uses_anchor_text_when_url_is_opaque():
+    planner = NavigationPlanner(max_hops=3, lock_domain=True)
+    intent = IntentParser().parse(
+        "Find the R9700 specifications",
+        explicit_seed_url="https://example.com/start",
+    )
+    planner.get_initial_step("https://example.com/start")
+    links = [
+        ("/p/123", "General accessories"),
+        ("/p/999", "R9700 specifications and memory"),
+    ]
+    step = planner.select_next_step("https://example.com/start", links, intent)
+    assert step is not None
+    assert step.target_url == "https://example.com/p/999"
