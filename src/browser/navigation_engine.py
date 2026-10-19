@@ -1,7 +1,7 @@
 import hashlib
-import urllib.request
 from datetime import datetime, timezone
 from typing import Dict
+from urllib.parse import urljoin
 
 from ..extractor.dom_extractor import DOMExtractor
 from ..models.schema import DOMSnapshot
@@ -9,11 +9,19 @@ from .url_policy import URLPolicy, URLPolicyError
 
 
 class NavigationEngine:
-    """Bounded HTTP retrieval with provenance snapshots and SSRF protection."""
+    """Bounded HTTP retrieval with provenance snapshots and URL safety checks."""
 
-    def __init__(self, timeout: float = 15.0, user_agent: str = "AMDAILeague-MC4"):
+    REDIRECT_CODES = {301, 302, 303, 307, 308}
+
+    def __init__(
+        self,
+        timeout: float = 15.0,
+        user_agent: str = "AMDAILeague-MC4",
+        max_redirects: int = 5,
+    ):
         self.timeout = timeout
         self.user_agent = user_agent
+        self.max_redirects = max_redirects
         self.extractor = DOMExtractor()
         self.url_policy = URLPolicy()
         self._mock_responses: Dict[str, str] = {}
@@ -29,33 +37,41 @@ class NavigationEngine:
             status_code = 200
         else:
             try:
-                self.url_policy.validate(url)
-                try:
-                    import requests
+                import requests
 
-                    headers = {"User-Agent": self.user_agent}
-                    resp = requests.get(
-                        url,
-                        headers=headers,
-                        timeout=self.timeout,
-                        allow_redirects=True,
-                    )
-                    # Re-check final redirect target to avoid redirect-based SSRF.
-                    self.url_policy.validate(resp.url)
-                    status_code = resp.status_code
-                    html = resp.text
-                    url = resp.url
-                except ImportError:
-                    req = urllib.request.Request(
-                        url,
+                current_url = url
+                response = None
+                for _ in range(self.max_redirects + 1):
+                    self.url_policy.validate(current_url)
+                    response = requests.get(
+                        current_url,
                         headers={"User-Agent": self.user_agent},
+                        timeout=self.timeout,
+                        allow_redirects=False,
                     )
-                    with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                        final_url = resp.geturl()
-                        self.url_policy.validate(final_url)
-                        status_code = resp.status
-                        html = resp.read().decode("utf-8", errors="replace")
-                        url = final_url
+
+                    if response.status_code not in self.REDIRECT_CODES:
+                        break
+
+                    location = response.headers.get("Location")
+                    if not location:
+                        break
+
+                    next_url = urljoin(current_url, location)
+                    # Validate BEFORE following so a public URL cannot redirect
+                    # the agent into localhost, metadata services, or RFC1918.
+                    self.url_policy.validate(next_url)
+                    current_url = next_url
+                else:
+                    raise RuntimeError("TOO_MANY_REDIRECTS")
+
+                if response is None:
+                    raise RuntimeError("NO_HTTP_RESPONSE")
+
+                url = current_url
+                status_code = response.status_code
+                html = response.text
+
             except URLPolicyError as exc:
                 html = f"<html><body>Blocked URL: {exc}</body></html>"
                 status_code = 403
