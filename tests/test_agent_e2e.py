@@ -95,3 +95,39 @@ def test_agent_skips_unrelated_price_and_follows_relevant_link():
     assert resp.answer == "$1299.00"
     assert resp.provenance is not None
     assert resp.provenance.source_url == "https://shop.test/p/999"
+
+
+
+def test_agent_follows_pagination_to_requested_value():
+    agent = WebRetrievalAgent()
+    agent.browser.register_mock(
+        "https://shop.test/catalog?page=1",
+        """
+        <html><body>
+          <h1>Catalog</h1>
+          <a href="/help">Help</a>
+          <a href="/catalog?page=2">Next</a>
+        </body></html>
+        """,
+    )
+    agent.browser.register_mock(
+        "https://shop.test/catalog?page=2",
+        """
+        <html><body>
+          <p>Widget Pro current price: $349.00 USD.</p>
+        </body></html>
+        """,
+    )
+    response = agent.execute(
+        RetrievalRequest(
+            query="What is the price of Widget Pro?",
+            seed_url="https://shop.test/catalog?page=1",
+            max_hops=3,
+        )
+    )
+
+    assert response.status == "SUCCESS"
+    assert response.answer == "$349.00"
+    assert response.provenance is not None
+    assert response.provenance.source_url == "https://shop.test/catalog?page=2"
+    assert len(response.navigation_trail) == 2
