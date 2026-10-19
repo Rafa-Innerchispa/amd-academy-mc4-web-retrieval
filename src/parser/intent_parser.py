@@ -47,8 +47,19 @@ class IntentParser:
         elif any(k in lower_q for k in ["specification", "specs", "ram", "memory", "tflops"]):
             target_attr = "technical_spec"
 
-        # Extract candidate target entity
-        target_entity = keywords[0] if keywords else "unknown_entity"
+        # Prefer a likely entity token over attribute/control words.
+        attribute_words = {
+            "price", "cost", "fee", "usd", "version", "release", "date",
+            "current", "latest", "phone", "telephone", "email", "hours",
+            "opening", "closing", "specification", "technical", "memory",
+            "ram", "author", "founder", "creator", "ceo",
+        }
+        entity_candidates = [kw for kw in keywords if kw not in attribute_words]
+        target_entity = (
+            entity_candidates[0]
+            if entity_candidates
+            else (keywords[0] if keywords else "unknown_entity")
+        )
 
         return ParsedIntent(
             raw_query=cleaned_query,
