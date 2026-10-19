@@ -106,6 +106,8 @@ def load_batch(path: str) -> list[dict]:
         for key in ("tasks", "queries", "items"):
             if isinstance(raw.get(key), list):
                 return raw[key]
+        if any(raw.get(key) for key in ("query", "question", "task", "prompt")):
+            return [raw]
     raise ValueError("unsupported_batch_shape")
 
 
@@ -115,7 +117,17 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     # MC3-style startup hooks are accepted as harmless no-ops until the
     # official Match 4 kit defines whether startup/indexing is required.
-    if args.warmup or args.index is not None:
+    if args.warmup:
+        return 0
+
+    has_query_args = first_nonempty([
+        args.query,
+        args.question,
+        args.task,
+        args.prompt,
+        args.positional_query,
+    ])
+    if args.index is not None and not has_query_args and not args.input:
         return 0
 
     output_dir = Path(args.output_dir or DEFAULT_OUTPUT_DIR)
