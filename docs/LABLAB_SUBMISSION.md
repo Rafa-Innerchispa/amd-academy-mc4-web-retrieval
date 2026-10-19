@@ -1,6 +1,6 @@
 # LabLab Submission Draft — AMD AI League Match 4
 
-> Draft prepared early so publication becomes a copy/paste operation once LabLab exposes the Match 4 submission field and the official grader artifact is verified.
+> Draft prepared early so publication becomes a copy/paste operation once LabLab exposes the Match 4 submission route and the official grader artifact is verified.
 
 ## Project name
 
@@ -18,21 +18,22 @@ The agent accepts a natural-language request and a starting web location, naviga
 
 The retrieval core is deliberately deterministic where possible:
 
-- intent-aware exact-value extraction for prices, dates, versions, contact data and technical specifications;
+- exact-value extraction for prices, dates, versions, contacts, opening hours, counts, people and technical specifications;
 - structured parsing of HTML tables and JSON-LD;
-- bounded navigation with loop prevention;
+- bounded navigation with loop prevention and anchor-aware link ranking;
 - provenance for every accepted answer;
 - fail-closed behavior when evidence cannot support the requested fact;
 - redirect and network-target safety controls;
-- configurable support for official internal grader hosts without weakening normal web defaults.
+- configurable support for official internal grader hosts without weakening normal web defaults;
+- atomic output so interrupted requests are less likely to leave malformed JSON.
 
 A separate demo interface makes the capability easy to use and inspect, while the graded container remains isolated and minimal.
 
-The project is local-first and designed for AMD ROCm. The final Match 4 Docker artifact will use the official challenge runtime and will be published only after the official Match 4 starter kit/contract is recovered and the image passes AMD hardware, resource, timing and anonymous-pull validation.
+The project is local-first and designed for AMD ROCm. The final Match 4 Docker artifact will use the official challenge contract and will only be published after AMD hardware, resource, timing and anonymous-pull validation.
 
 ## Why AMD
 
-The challenge artifact is designed around the AMD AI League container model: AMD ROCm runtime, GPU execution, reproducible local inference/extraction, no paid external inference dependency, and strict evidence-driven behavior.
+The challenge artifact follows the AMD AI League container pattern: AMD ROCm runtime, GPU-oriented execution, reproducible local processing, no paid external inference dependency, and strict evidence-driven behavior.
 
 The broader InnerOS architecture uses AMD hardware as a local execution layer for governed agent workflows. Match 4 validates web retrieval as another independently testable capability before promotion into the wider platform.
 
@@ -70,21 +71,26 @@ Digest:
 
 `PENDING_OFFICIAL_MC4_CONTRACT_AND_FINAL_BUILD`
 
-## Verification
+## Current verification
 
-Current Python core:
+Local functional evidence:
 
-- **22 local tests previously passed; 3 new navigation/entity tests are pending rerun**
+- **34 tests passed**
+- Python compileall: **PASS**
+- offline benchmark: **9/9 PASS**
+- exact-case accuracy: **1.0**
 - bounded navigation: PASS
 - fail-closed grounding: PASS
-- JSON-LD extraction: PASS
+- JSON-LD extraction + raw-HTML grounding: PASS
 - HTML table extraction: PASS
+- anchor-aware multi-hop navigation: PASS
 - private-network blocking by default: PASS
 - redirect-to-private-target blocking: PASS
 - explicit internal grader-host allowlisting: PASS
+- atomic output: PASS
 
-Final AMD Docker metrics remain pending until the official Match 4 contract is available.
+These are development-container results only. Final AMD GPU, Docker size, VRAM, runtime timing, official sample/selfcheck, public pull and immutable digest remain pending.
 
 ## Submission truth boundary
 
-This draft does not claim the Docker image is final or publicly available yet. Match 4-specific grader invocation/output requirements remain intentionally unfrozen until AMD/LabLab publishes the official contract.
+This draft does not claim the Docker image is final or publicly available. Match 4-specific grader invocation/output requirements remain intentionally unfrozen until AMD/LabLab publishes the official contract.
