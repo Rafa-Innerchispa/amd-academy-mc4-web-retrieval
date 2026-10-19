@@ -146,3 +146,26 @@ class DOMExtractor:
             parser = _SimpleHTMLTextExtractor()
             parser.feed(html_content)
             return parser.tables
+
+
+    def extract_link_candidates(self, html_content: str):
+        """Return (href, anchor_text) pairs for navigation ranking."""
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html_content, "html.parser")
+            candidates = []
+            seen = set()
+            for anchor in soup.find_all("a", href=True):
+                href = anchor["href"].strip()
+                if not href or href.startswith(("#", "javascript:", "mailto:", "tel:")):
+                    continue
+                text = re.sub(r"\s+", " ", anchor.get_text(" ", strip=True)).strip()
+                key = (href, text)
+                if key not in seen:
+                    seen.add(key)
+                    candidates.append(key)
+            return candidates
+        except ImportError:
+            # The standard-library fallback cannot reliably preserve anchor text
+            # with the current parser, so retain URL-only compatibility.
+            return [(href, "") for href in self.extract_links(html_content)]
