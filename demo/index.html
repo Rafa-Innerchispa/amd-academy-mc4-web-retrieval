@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>InnerOS Web Retrieval</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">INNEROS × AMD ROCm</div>
+      <h1>Verified Web Retrieval</h1>
+      <p>Ask for one specific fact. The agent navigates, extracts, verifies, and returns the value with evidence instead of manufacturing confidence.</p>
+      <div class="badges">
+        <span>AMD AI League · Match 4</span>
+        <span>Local-first</span>
+        <span>Fail-closed</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <form id="query-form">
+        <label>
+          <span>Question</span>
+          <textarea id="query" rows="3" placeholder="What is the current price of this product?" required></textarea>
+        </label>
+        <label>
+          <span>Starting URL</span>
+          <input id="url" type="url" placeholder="https://example.com/product" required />
+        </label>
+        <div class="actions">
+          <button id="run" type="submit">Retrieve verified answer</button>
+          <button id="clear" type="button" class="ghost">Clear</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="status" class="status hidden"></section>
+
+    <section id="result" class="result-grid hidden">
+      <article class="card answer-card">
+        <div class="card-label">VERIFIED ANSWER</div>
+        <div id="answer" class="answer"></div>
+        <div id="verification" class="verification"></div>
+      </article>
+
+      <article class="card">
+        <div class="card-label">EVIDENCE</div>
+        <a id="source" class="source" target="_blank" rel="noreferrer"></a>
+        <blockquote id="evidence"></blockquote>
+        <div id="hash" class="mono"></div>
+      </article>
+
+      <article class="card wide">
+        <div class="card-label">NAVIGATION TRAIL</div>
+        <ol id="trail" class="trail"></ol>
+      </article>
+    </section>
+
+    <section id="failure" class="card failure hidden">
+      <div class="card-label">FAIL-CLOSED</div>
+      <h2>No supported answer returned</h2>
+      <p id="failure-reason"></p>
+    </section>
+
+    <footer>
+      Technical demo UI. The graded container contract remains separate and minimal.
+    </footer>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
