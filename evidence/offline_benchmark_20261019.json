@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-19",
+  "branch": "chatgpt/mc4-core-20261019",
+  "benchmark": "tools/benchmark_core.py",
+  "environment": {
+    "kind": "ChatGPT working container (development validation only)",
+    "python": "3.13.5",
+    "amd_gpu": false
+  },
+  "summary": {
+    "cases": 9,
+    "passed": 9,
+    "failed": 0,
+    "exact_case_accuracy": 1,
+    "latency_ms_p50": 0.592,
+    "latency_ms_p95": 86.704
+  },
+  "cases": [
+    {
+      "name": "direct_price",
+      "answer": "$1299.00",
+      "source": "https://bench.test/r9700",
+      "steps": 1
+    },
+    {
+      "name": "release_date",
+      "answer": "October 13, 2026",
+      "source": "https://bench.test/match4",
+      "steps": 1
+    },
+    {
+      "name": "version",
+      "answer": "10.1.0",
+      "source": "https://bench.test/rocm",
+      "steps": 1
+    },
+    {
+      "name": "technical_spec_table",
+      "answer": "192GB",
+      "source": "https://bench.test/accelerators",
+      "steps": 1
+    },
+    {
+      "name": "json_ld_price",
+      "answer": "$349.00",
+      "source": "https://bench.test/widget",
+      "steps": 1
+    },
+    {
+      "name": "opaque_multihop_with_decoy",
+      "answer": "$1299.00",
+      "source": "https://bench.test/p/999",
+      "steps": 2
+    },
+    {
+      "name": "opening_hours",
+      "answer": "Monday-Friday 9:00 AM - 5:00 PM",
+      "source": "https://bench.test/hours",
+      "steps": 1
+    },
+    {
+      "name": "contact_email",
+      "answer": "support@chispa.example",
+      "source": "https://bench.test/contact",
+      "steps": 1
+    },
+    {
+      "name": "fail_closed_missing",
+      "answer": null,
+      "source": null,
+      "steps": 1
+    }
+  ],
+  "caveat": "Offline mocked benchmark. Not an official AMD/LabLab score and not an AMD GPU performance result."
+}
