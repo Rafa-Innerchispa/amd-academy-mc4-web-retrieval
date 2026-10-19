@@ -446,7 +446,33 @@ class CandidateExtractor:
             "person": ("author", "founder", "creator", "ceo"),
         }.get(intent.target_attribute, ())
         attr_bonus = 0.75 * sum(1 for word in attr_words if word in lower)
-        return matched * 2.0 + entity_bonus + attr_bonus
+        temporal_bonus = self._temporal_relevance_bonus(lower, intent.raw_query.lower())
+        return matched * 2.0 + entity_bonus + attr_bonus + temporal_bonus
+
+    def _temporal_relevance_bonus(self, context: str, query: str) -> float:
+        fresh_terms = (
+            "current", "latest", "active", "recommended", "newest",
+            "present", "today", "now",
+        )
+        stale_terms = (
+            "old", "previous", "legacy", "archived", "deprecated",
+            "obsolete", "superseded", "former", "historical", "prior",
+        )
+
+        asks_fresh = any(self._contains_term(query, term) for term in fresh_terms)
+        asks_stale = any(self._contains_term(query, term) for term in stale_terms)
+
+        if asks_fresh and not asks_stale:
+            fresh_hits = sum(self._contains_term(context, term) for term in fresh_terms)
+            stale_hits = sum(self._contains_term(context, term) for term in stale_terms)
+            return 1.5 * fresh_hits - 2.0 * stale_hits
+
+        if asks_stale and not asks_fresh:
+            stale_hits = sum(self._contains_term(context, term) for term in stale_terms)
+            fresh_hits = sum(self._contains_term(context, term) for term in fresh_terms)
+            return 1.5 * stale_hits - 1.0 * fresh_hits
+
+        return 0.0
 
     def _contains_term(self, text: str, term: str) -> bool:
         """Match query terms as lexical units instead of arbitrary substrings."""
