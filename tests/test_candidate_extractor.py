@@ -96,3 +96,11 @@ def test_conflicting_old_and_current_price_prefers_current_product_block():
 
     assert best is not None
     assert best.value == "$1299.00"
+
+
+def test_keyword_pro_does_not_match_product_substring():
+    extractor = CandidateExtractor()
+    intent = IntentParser().parse("What is the price of Widget Pro?")
+    basic = extractor._score_context("product: Widget Basic | price: 99.00", intent)
+    pro = extractor._score_context("product: Widget Pro | price: 349.00", intent)
+    assert pro > basic
