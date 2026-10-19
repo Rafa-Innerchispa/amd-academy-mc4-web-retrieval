@@ -52,7 +52,7 @@ A local mirror of the current branch source/tests was executed with:
 
 Result:
 
-**22 passed**
+**25 passed**
 
 This validates the Python retrieval core and safety tests. It is **not** a substitute for final AMD Docker validation.
 
