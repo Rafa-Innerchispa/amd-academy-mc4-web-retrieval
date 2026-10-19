@@ -52,6 +52,13 @@ class CandidateExtractor:
         "technical_spec": [
             r"\b\d+(?:\.\d+)?\s?(?:GB|GiB|MB|MHz|GHz|W|kW|TFLOPS?|TOPS?|Gbps|Mbps)\b",
         ],
+        "number": [
+            r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?![\w.])",
+        ],
+        "hours": [
+            r"\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)(?:\s*[-–]\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday))?\s*[:,-]?\s*\d{1,2}(?::\d{2})?\s*(?:AM|PM)?\s*[-–]\s*\d{1,2}(?::\d{2})?\s*(?:AM|PM)?\b",
+            r"\b\d{1,2}(?::\d{2})?\s*(?:AM|PM)\s*[-–]\s*\d{1,2}(?::\d{2})?\s*(?:AM|PM)\b",
+        ],
     }
 
     def __init__(self) -> None:
@@ -170,7 +177,9 @@ class CandidateExtractor:
         if "phone" in q or "telephone" in q or "call" in q:
             return "phone"
         if "hours" in q or "open" in q or "closing" in q:
-            return "general_information"
+            return "hours"
+        if "how many" in q or "number of" in q or "count of" in q:
+            return "number"
         return intent.target_attribute
 
     def _extract_values_from_fragment(self, fragment: str, intent) -> List[str]:
@@ -193,6 +202,10 @@ class CandidateExtractor:
             "version": ("version", "release", "firmware"),
             "date_or_time": ("date", "released", "published", "launched"),
             "technical_spec": ("memory", "ram", "spec", "capacity", "speed", "power"),
+            "hours": ("hours", "open", "opening", "closing"),
+            "number": ("number", "count", "total"),
+            "phone": ("phone", "telephone", "call"),
+            "email": ("email", "contact"),
             "person": ("author", "founder", "creator", "ceo"),
         }.get(intent.target_attribute, ())
         attr_bonus = 0.75 * sum(1 for word in attr_words if word in lower)
