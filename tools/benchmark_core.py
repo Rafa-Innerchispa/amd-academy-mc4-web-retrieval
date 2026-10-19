@@ -267,6 +267,21 @@ CASES: List[Case] = [
         expected_source="https://bench.test/unit-a",
     ),
     Case(
+        name="same_entity_conflicting_current_value",
+        query="What is the current price of Widget Pro?",
+        seed_url="https://bench.test/widget-pricing",
+        pages={
+            "https://bench.test/widget-pricing": """
+                <html><body>
+                  <p>Widget Pro previous archived price: $299.00 USD.</p>
+                  <p>Widget Pro current price: $349.00 USD.</p>
+                </body></html>
+            """,
+        },
+        expected_answer="$349.00",
+        expected_source="https://bench.test/widget-pricing",
+    ),
+    Case(
         name="fail_closed_missing",
         query="What is the price of the R9700 workstation?",
         seed_url="https://bench.test/missing",
