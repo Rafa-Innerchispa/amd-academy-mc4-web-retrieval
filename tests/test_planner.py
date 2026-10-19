@@ -63,3 +63,41 @@ def test_planner_normalizes_same_hostname_case_trailing_dot_and_port():
     step = planner.select_next_step("https://Example.COM/start", links, intent)
     assert step is not None
     assert step.target_url == "https://example.com.:443/specs"
+
+
+def test_planner_backtracks_to_earlier_alternative_after_dead_end():
+    planner = NavigationPlanner(max_hops=4, lock_domain=True)
+    intent = IntentParser().parse(
+        "Find Widget Pro price",
+        explicit_seed_url="https://example.com/start",
+    )
+    planner.get_initial_step("https://example.com/start")
+
+    first = planner.select_next_step(
+        "https://example.com/start",
+        [
+            ("/widget-pro-news", "Widget Pro price announcement"),
+            ("/widget-pro-spec", "Widget Pro product price"),
+        ],
+        intent,
+    )
+    assert first is not None
+    assert first.target_url == "https://example.com/widget-pro-news"
+
+    # The first page is a dead end. The planner should retain and visit the
+    # second-best link discovered on the seed page instead of stopping.
+    second = planner.select_next_step(first.target_url, [], intent)
+    assert second is not None
+    assert second.target_url == "https://example.com/widget-pro-spec"
+
+
+def test_planner_frontier_stays_bounded():
+    planner = NavigationPlanner(max_hops=3, lock_domain=True, max_frontier=5)
+    intent = IntentParser().parse(
+        "Find specifications",
+        explicit_seed_url="https://example.com/start",
+    )
+    planner.get_initial_step("https://example.com/start")
+    links = [(f"/item/{i}", f"item {i}") for i in range(30)]
+    planner._add_to_frontier("https://example.com/start", links, intent)
+    assert len(planner._frontier) == 5
