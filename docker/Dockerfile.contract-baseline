@@ -7,7 +7,8 @@ FROM rocm/pytorch:rocm10.0_ubuntu26.04_py3.14_pytorch_release_2.13.0
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app \
+    AGENT_OUTPUT=/app/output
 
 WORKDIR /app
 
@@ -15,9 +16,10 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY src/ /app/src/
+COPY app/app.py /app/app.py
 
 RUN mkdir -p /app/output
 
 # Programme pattern from MC2/MC3: no HTTP service and no exposed port.
-# The grader executes its command inside an already-running container.
+# The grader executes commands inside an already-running container.
 CMD ["sleep", "infinity"]
