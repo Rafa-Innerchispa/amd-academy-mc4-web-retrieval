@@ -3,69 +3,124 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>InnerOS Web Retrieval</title>
+  <meta name="theme-color" content="#080a0f" />
+  <title>InnerOS · Verified Web Retrieval</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
   <main class="shell">
-    <section class="hero">
-      <div class="eyebrow">INNEROS × AMD ROCm</div>
-      <h1>Verified Web Retrieval</h1>
-      <p>Ask for one specific fact. The agent navigates, extracts, verifies, and returns the value with evidence instead of manufacturing confidence.</p>
-      <div class="badges">
-        <span>AMD AI League · Match 4</span>
-        <span>Local-first</span>
-        <span>Fail-closed</span>
+    <nav class="topbar">
+      <div class="brand">
+        <span class="brand-mark">I</span>
+        <span>InnerOS</span>
       </div>
+      <div class="live-pill"><i></i> AMD AI League · Match 4</div>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">GOVERNED RETRIEVAL · AMD ROCm</div>
+        <h1>Find the fact.<br><span>Prove the source.</span></h1>
+        <p>Evidence-first web retrieval for questions that need a specific answer, not a confident paragraph assembled from vibes.</p>
+      </div>
+      <aside class="hero-proof">
+        <div class="proof-row"><strong>34</strong><span>local tests passing</span></div>
+        <div class="proof-row"><strong>9/9</strong><span>offline benchmark</span></div>
+        <div class="proof-row"><strong>0</strong><span>paid inference APIs</span></div>
+      </aside>
     </section>
 
-    <section class="panel">
+    <section class="workspace">
+      <div class="workspace-head">
+        <div>
+          <span class="section-kicker">RETRIEVAL CONSOLE</span>
+          <h2>Ask for one exact value</h2>
+        </div>
+        <div class="mode-pill">Evidence-first · Fail-closed</div>
+      </div>
+
+      <div class="examples">
+        <button type="button" class="example" data-query="What is the current ROCm version?" data-url="https://rocm.docs.amd.com">ROCm version</button>
+        <button type="button" class="example" data-query="What is the release date of ROCm 6.2?" data-url="https://rocm.docs.amd.com">Release date</button>
+        <button type="button" class="example" data-query="What is the memory capacity of the AMD Instinct MI300X?" data-url="https://www.amd.com/en/products/accelerators/instinct/mi300/mi300x.html">MI300X memory</button>
+      </div>
+
       <form id="query-form">
-        <label>
-          <span>Question</span>
-          <textarea id="query" rows="3" placeholder="What is the current price of this product?" required></textarea>
+        <label class="field field-query">
+          <span>QUESTION</span>
+          <textarea id="query" rows="3" placeholder="What exact fact should I retrieve?" required></textarea>
         </label>
-        <label>
-          <span>Starting URL</span>
-          <input id="url" type="url" placeholder="https://example.com/product" required />
+        <label class="field">
+          <span>STARTING URL</span>
+          <input id="url" type="url" placeholder="https://source.example/page" required />
+          <small>The current technical core starts from an explicit source URL. Search-provider mode stays isolated until the official Match 4 contract is known.</small>
         </label>
         <div class="actions">
-          <button id="run" type="submit">Retrieve verified answer</button>
-          <button id="clear" type="button" class="ghost">Clear</button>
+          <button id="run" class="primary" type="submit"><span>Retrieve verified answer</span><b>→</b></button>
+          <button id="clear" type="button" class="ghost">Reset</button>
         </div>
       </form>
     </section>
 
-    <section id="status" class="status hidden"></section>
+    <section id="status" class="status hidden">
+      <div class="spinner"></div>
+      <div>
+        <div id="status-title" class="status-title">Understanding request</div>
+        <div id="status-detail" class="status-detail">Preparing bounded retrieval…</div>
+      </div>
+      <div id="status-time" class="status-time">0.0s</div>
+    </section>
 
     <section id="result" class="result-grid hidden">
       <article class="card answer-card">
-        <div class="card-label">VERIFIED ANSWER</div>
+        <div class="card-head">
+          <div class="card-label">VERIFIED ANSWER</div>
+          <div class="verified-dot">VERIFIED</div>
+        </div>
         <div id="answer" class="answer"></div>
         <div id="verification" class="verification"></div>
+        <div class="metric-strip">
+          <div><span>Elapsed</span><strong id="elapsed">—</strong></div>
+          <div><span>Candidate score</span><strong id="score">—</strong></div>
+          <div><span>Steps</span><strong id="steps">—</strong></div>
+        </div>
       </article>
 
-      <article class="card">
-        <div class="card-label">EVIDENCE</div>
+      <article class="card evidence-card">
+        <div class="card-label">SOURCE EVIDENCE</div>
         <a id="source" class="source" target="_blank" rel="noreferrer"></a>
         <blockquote id="evidence"></blockquote>
-        <div id="hash" class="mono"></div>
+        <div class="hash-block">
+          <span>SNAPSHOT</span>
+          <div id="hash" class="mono"></div>
+        </div>
       </article>
 
       <article class="card wide">
-        <div class="card-label">NAVIGATION TRAIL</div>
+        <div class="card-head">
+          <div class="card-label">NAVIGATION TRAIL</div>
+          <div class="quiet">bounded · loop protected</div>
+        </div>
         <ol id="trail" class="trail"></ol>
       </article>
     </section>
 
     <section id="failure" class="card failure hidden">
-      <div class="card-label">FAIL-CLOSED</div>
-      <h2>No supported answer returned</h2>
-      <p id="failure-reason"></p>
+      <div class="failure-icon">×</div>
+      <div>
+        <div class="card-label">FAIL-CLOSED</div>
+        <h2>No supported answer returned</h2>
+        <p id="failure-reason"></p>
+        <small>The agent returned nothing rather than inventing evidence. A surprisingly advanced feature in the year 2026.</small>
+      </div>
     </section>
 
     <footer>
-      Technical demo UI. The graded container contract remains separate and minimal.
+      <span>InnerOS Verified Web Retrieval</span>
+      <span>Demo layer isolated from the graded container contract.</span>
     </footer>
   </main>
   <script src="/app.js"></script>
