@@ -1,20 +1,21 @@
 import hashlib
 import urllib.request
 from datetime import datetime, timezone
-from typing import Optional, Dict
-from ..models.schema import DOMSnapshot
+from typing import Dict
+
 from ..extractor.dom_extractor import DOMExtractor
+from ..models.schema import DOMSnapshot
+from .url_policy import URLPolicy, URLPolicyError
+
 
 class NavigationEngine:
-    """
-    Safe HTTP / Mock retrieval engine with retry bounds and snapshot hashing.
-    Runs zero-dependency with urllib.request and falls back gracefully.
-    """
+    """Bounded HTTP retrieval with provenance snapshots and SSRF protection."""
 
     def __init__(self, timeout: float = 15.0, user_agent: str = "AMDAILeague-MC4"):
         self.timeout = timeout
         self.user_agent = user_agent
         self.extractor = DOMExtractor()
+        self.url_policy = URLPolicy()
         self._mock_responses: Dict[str, str] = {}
 
     def register_mock(self, url: str, html_body: str):
@@ -28,24 +29,38 @@ class NavigationEngine:
             status_code = 200
         else:
             try:
-                # Try requests first if available
-                import requests
-                headers = {"User-Agent": self.user_agent}
-                resp = requests.get(url, headers=headers, timeout=self.timeout)
-                status_code = resp.status_code
-                html = resp.text
-            except ImportError:
-                # Zero-dependency standard library fallback
+                self.url_policy.validate(url)
                 try:
-                    req = urllib.request.Request(url, headers={"User-Agent": self.user_agent})
+                    import requests
+
+                    headers = {"User-Agent": self.user_agent}
+                    resp = requests.get(
+                        url,
+                        headers=headers,
+                        timeout=self.timeout,
+                        allow_redirects=True,
+                    )
+                    # Re-check final redirect target to avoid redirect-based SSRF.
+                    self.url_policy.validate(resp.url)
+                    status_code = resp.status_code
+                    html = resp.text
+                    url = resp.url
+                except ImportError:
+                    req = urllib.request.Request(
+                        url,
+                        headers={"User-Agent": self.user_agent},
+                    )
                     with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                        final_url = resp.geturl()
+                        self.url_policy.validate(final_url)
                         status_code = resp.status
                         html = resp.read().decode("utf-8", errors="replace")
-                except Exception as net_err:
-                    html = f"<html><body><h1>Fetch Error: {str(net_err)}</h1></body></html>"
-                    status_code = 502
-            except Exception as e:
-                html = f"<html><body><h1>Fetch Error: {str(e)}</h1></body></html>"
+                        url = final_url
+            except URLPolicyError as exc:
+                html = f"<html><body>Blocked URL: {exc}</body></html>"
+                status_code = 403
+            except Exception as exc:
+                html = f"<html><body>Fetch Error: {type(exc).__name__}</body></html>"
                 status_code = 502
 
         content_hash = hashlib.sha256(html.encode("utf-8")).hexdigest()
@@ -57,5 +72,5 @@ class NavigationEngine:
             content_hash=content_hash,
             raw_html=html,
             cleaned_text=clean_text,
-            timestamp_utc=timestamp_utc
+            timestamp_utc=timestamp_utc,
         )
