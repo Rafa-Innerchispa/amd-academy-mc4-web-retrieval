@@ -19,5 +19,30 @@ def test_url_policy_blocks_private_and_non_http_targets(url):
         URLPolicy().validate(url)
 
 
-def test_url_policy_accepts_public_https_domain():
+def test_url_policy_accepts_public_https_domain(monkeypatch):
+    monkeypatch.setattr(
+        "socket.getaddrinfo",
+        lambda *args, **kwargs: [(2, 1, 6, "", ("93.184.216.34", 443))],
+    )
     assert URLPolicy().validate("https://example.com/path") == "https://example.com/path"
+
+
+def test_navigation_blocks_redirect_to_private_ip(monkeypatch):
+    from src.browser.navigation_engine import NavigationEngine
+
+    class Response:
+        status_code = 302
+        headers = {"Location": "http://127.0.0.1/admin"}
+        text = "redirect"
+
+    calls = []
+
+    def fake_get(url, **kwargs):
+        calls.append(url)
+        return Response()
+
+    monkeypatch.setattr("requests.get", fake_get)
+    snapshot = NavigationEngine().fetch("https://public.invalid/start")
+
+    assert snapshot.status_code == 403
+    assert calls == ["https://public.invalid/start"]
