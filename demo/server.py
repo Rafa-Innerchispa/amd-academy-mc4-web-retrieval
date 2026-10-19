@@ -8,10 +8,16 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from src.agent import WebRetrievalAgent
+from src.config import AgentConfig
 from src.models.schema import RetrievalRequest
 
 ROOT = Path(__file__).resolve().parent
-AGENT = WebRetrievalAgent()
+AGENT = WebRetrievalAgent(
+    AgentConfig(
+        enable_public_search=True,
+        total_budget_seconds=24.0,
+    )
+)
 
 
 class Handler(BaseHTTPRequestHandler):
