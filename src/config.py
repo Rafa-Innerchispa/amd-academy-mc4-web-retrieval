@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, Field
 
 
@@ -15,6 +17,14 @@ class AgentConfig(BaseModel):
     allow_external_domains: bool = Field(
         default=False,
         description="Allow navigation outside the seed domain. Disabled by default.",
+    )
+    allow_private_network_targets: bool = Field(
+        default=False,
+        description="Permit private/internal network targets. Keep false for normal web use.",
+    )
+    allowed_private_hosts: List[str] = Field(
+        default_factory=list,
+        description="Explicit private/internal hosts allowed by an official grader adapter.",
     )
 
 
