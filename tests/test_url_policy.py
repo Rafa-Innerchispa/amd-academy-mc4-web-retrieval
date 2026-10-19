@@ -46,3 +46,11 @@ def test_navigation_blocks_redirect_to_private_ip(monkeypatch):
 
     assert snapshot.status_code == 403
     assert calls == ["https://public.invalid/start"]
+
+
+def test_url_policy_can_allow_explicit_internal_grader_host():
+    policy = URLPolicy(allowed_private_hosts=["127.0.0.1"])
+    assert (
+        policy.validate("http://127.0.0.1:8080/task")
+        == "http://127.0.0.1:8080/task"
+    )
