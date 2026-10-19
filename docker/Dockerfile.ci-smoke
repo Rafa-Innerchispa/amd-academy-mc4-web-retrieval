@@ -1,0 +1,18 @@
+FROM python:3.13-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    AGENT_OUTPUT=/app/output
+
+WORKDIR /app
+
+COPY requirements-runtime.txt /app/requirements-runtime.txt
+RUN pip install --no-cache-dir -r /app/requirements-runtime.txt
+
+COPY src/ /app/src/
+COPY app/app.py /app/app.py
+
+RUN mkdir -p /app/output
+
+CMD ["sleep", "infinity"]
