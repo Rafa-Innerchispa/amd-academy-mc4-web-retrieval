@@ -39,15 +39,15 @@ Implemented on the development branch:
 
 Development validation on the current implementation:
 
-- **52 tests passed**
+- **63 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
-- offline retrieval benchmark: **12/12 cases PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39323157430)
+- offline retrieval benchmark: **all current cases PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39324279750)
 
 - exact-case accuracy: **1.0**
-- CI mocked benchmark p50: **0.98 ms**
-- CI mocked benchmark p95: **1.515 ms**
-- new adversarial coverage: JSON API responses, structured prompt injection, cross-domain redirects and decoy-link backtracking
+- CI mocked benchmark p50: **2.167 ms**
+- CI mocked benchmark p95: **3.837 ms**
+- adversarial coverage: JSON/API responses, structured prompt injection, cross-domain redirects, absolute deadline enforcement, fragment deduplication, decoy-link backtracking, and current-vs-stale conflicting values
 
 Evidence:
 
