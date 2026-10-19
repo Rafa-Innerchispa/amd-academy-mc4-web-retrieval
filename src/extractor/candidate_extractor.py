@@ -199,6 +199,35 @@ class CandidateExtractor:
         return matched * 2.0 + entity_bonus + attr_bonus
 
     def _context(self, text: str, start: int, end: int, radius: int = 180) -> str:
+        """Prefer the local sentence so unrelated nearby values do not tie.
+
+        If sentence boundaries are unavailable, fall back to a bounded character
+        window. This matters on product pages where several prices/versions often
+        appear close together.
+        """
+        left_candidates = [
+            text.rfind(".", 0, start),
+            text.rfind("!", 0, start),
+            text.rfind("?", 0, start),
+            text.rfind("\n", 0, start),
+        ]
+        right_candidates = [
+            idx for idx in (
+                text.find(".", end),
+                text.find("!", end),
+                text.find("?", end),
+                text.find("\n", end),
+            )
+            if idx != -1
+        ]
+
+        sentence_left = max(left_candidates) + 1
+        sentence_right = min(right_candidates) + 1 if right_candidates else len(text)
+        sentence = text[sentence_left:sentence_right].strip()
+
+        if sentence and len(sentence) <= radius * 2:
+            return sentence
+
         left = max(0, start - radius)
         right = min(len(text), end + radius)
         return text[left:right].strip()
