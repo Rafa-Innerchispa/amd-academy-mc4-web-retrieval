@@ -27,7 +27,7 @@ Implemented on the active development branch:
 - isolated polished demo UI under `demo/`
 - additional tests for candidate ranking and URL safety
 
-The graded adapter and Docker contract are intentionally **not frozen yet** because the public Match 4 page currently does not expose a usable starter-kit/grader-detail destination.
+The graded adapter is intentionally **not frozen yet** because the public Match 4 page currently does not expose a usable starter-kit/grader-detail destination. The Python core has now passed **22 local tests**. The official MC3 starter kit also confirms a reusable programme-level Docker pattern, so a provisional ROCm container baseline and selfcheck have been added without pretending the Match 4 invocation schema is known.
 
 See [docs/CHALLENGE_CONTRACT.md](docs/CHALLENGE_CONTRACT.md).
 
@@ -133,3 +133,18 @@ Canonical AMD AI League umbrella:
 https://github.com/Rafa-Innerchispa/inneros-amd-ai-league-2026
 
 Match 2 and Match 3 remain independently verified artifacts. Match 4 is an active development lane and will only be promoted in the umbrella as VERIFIED after the public container and grader evidence are complete.
+
+
+## Programme-level container baseline
+
+The user-provided official MC3 starter kit explicitly says that container rules are shared across the challenge programme and that MC2/MC3 use the same base image, size/VRAM rules and no-server/no-port shape.
+
+This repo therefore now includes:
+
+- `docker/Dockerfile.contract-baseline`
+- `tools/selfcheck_program_rules.py`
+- `docs/MC3_STARTER_KIT_LESSONS.md`
+- `docs/SUBMISSION_READINESS.md`
+- `docs/LABLAB_SUBMISSION.md`
+
+These prepare the final container workflow without guessing Match 4-specific CLI or JSON fields.
