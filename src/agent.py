@@ -1,5 +1,6 @@
 import time
 from typing import Optional
+from urllib.parse import urlparse
 
 from .browser.navigation_engine import NavigationEngine
 from .config import AgentConfig, DEFAULT_CONFIG
@@ -75,6 +76,9 @@ class WebRetrievalAgent:
 
         current_step = planner.get_initial_step(intent.inferred_seed_url)
         all_steps = [current_step]
+        seed_host = (
+            (urlparse(intent.inferred_seed_url).hostname or "").rstrip(".").lower()
+        )
 
         while current_step:
             if time.monotonic() - started >= self.config.total_budget_seconds:
@@ -89,7 +93,10 @@ class WebRetrievalAgent:
                     },
                 )
 
-            snapshot = self.browser.fetch(current_step.target_url)
+            snapshot = self.browser.fetch(
+                current_step.target_url,
+                allowed_host=None if self.config.allow_external_domains else seed_host,
+            )
 
             if snapshot.status_code == 200:
                 ranked = self.candidates.extract(
