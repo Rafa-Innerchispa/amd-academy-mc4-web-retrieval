@@ -78,6 +78,8 @@ Local functional evidence:
 - **40 tests passed**
 - Python compileall: **PASS**
 - offline benchmark: **9/9 PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39315320387, network disabled, fail-closed adapter output, no demo TCP port)
+
 - exact-case accuracy: **1.0**
 - bounded navigation: PASS
 - fail-closed grounding: PASS
