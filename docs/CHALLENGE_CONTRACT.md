@@ -16,6 +16,17 @@ AMD AI League on LabLab:
 Public League page:
 https://lablab.ai/ai-hackathons/amd-lablab-ai-academy-challenge
 
+## Live LabLab submission-form check — 2026-10-19
+
+An authenticated read of the team's current LabLab submission form shows Step 1 exposing exactly these challenge-artifact fields:
+
+- `Mini Challenge 2 Image`
+- `Mini Challenge 3 Image`
+
+There is **no visible Mini Challenge 4 Image field** in the current form at the time of this check.
+
+This is evidence about the present UI only. It does not prove that Match 4 will never use this form or that a separate publication route will not appear. The final Match 4 image should therefore be prepared independently and held ready for the moment LabLab exposes or documents the submission mechanism.
+
 ## Important release-state finding
 
 As of this review, the public League page exposes a working Match 3 starter-kit link, but the visible **View match details** control for Match 4 does not expose a usable destination or downloadable starter kit from the public page.
