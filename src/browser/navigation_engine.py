@@ -1,4 +1,5 @@
 import hashlib
+import time
 from datetime import datetime, timezone
 from typing import Dict
 from urllib.parse import urljoin
@@ -34,7 +35,12 @@ class NavigationEngine:
     def register_mock(self, url: str, html_body: str):
         self._mock_responses[url] = html_body
 
-    def fetch(self, url: str, allowed_host: str | None = None) -> DOMSnapshot:
+    def fetch(
+        self,
+        url: str,
+        allowed_host: str | None = None,
+        deadline_monotonic: float | None = None,
+    ) -> DOMSnapshot:
         timestamp_utc = datetime.now(timezone.utc).isoformat()
         normalized_allowed_host = (
             allowed_host.rstrip(".").lower() if allowed_host else None
@@ -50,11 +56,19 @@ class NavigationEngine:
                 current_url = url
                 response = None
                 for _ in range(self.max_redirects + 1):
+                    if deadline_monotonic is not None:
+                        remaining = deadline_monotonic - time.monotonic()
+                        if remaining <= 0:
+                            raise TimeoutError("TIME_BUDGET_EXCEEDED")
+                        request_timeout = min(self.timeout, max(0.001, remaining))
+                    else:
+                        request_timeout = self.timeout
+
                     self.url_policy.validate(current_url)
                     response = requests.get(
                         current_url,
                         headers={"User-Agent": self.user_agent},
-                        timeout=self.timeout,
+                        timeout=request_timeout,
                         allow_redirects=False,
                     )
 
@@ -93,6 +107,9 @@ class NavigationEngine:
             except URLPolicyError as exc:
                 html = f"<html><body>Blocked URL: {exc}</body></html>"
                 status_code = 403
+            except TimeoutError:
+                html = "<html><body>TIME_BUDGET_EXCEEDED</body></html>"
+                status_code = 504
             except Exception as exc:
                 html = f"<html><body>Fetch Error: {type(exc).__name__}</body></html>"
                 status_code = 502
