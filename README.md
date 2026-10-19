@@ -42,6 +42,8 @@ Development validation on the current implementation:
 - **40 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
 - offline retrieval benchmark: **9/9 cases PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39315320387, network disabled, fail-closed adapter output, no demo TCP port)
+
 - exact-case accuracy: **1.0**
 - CI mocked benchmark p50: **1.416 ms**
 - CI mocked benchmark p95: **35.885 ms**
