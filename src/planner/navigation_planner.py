@@ -32,7 +32,14 @@ class NavigationPlanner:
 
         scored_links = []
         for raw_link in available_links:
-            resolved_link = urljoin(current_url, raw_link)
+            if isinstance(raw_link, (tuple, list)):
+                href = raw_link[0]
+                anchor_text = raw_link[1] if len(raw_link) > 1 else ""
+            else:
+                href = raw_link
+                anchor_text = ""
+
+            resolved_link = urljoin(current_url, href)
             parsed_resolved = urlparse(resolved_link)
 
             # Domain lock validation
@@ -43,11 +50,16 @@ class NavigationPlanner:
             if resolved_link in self.visited_urls:
                 continue
 
-            # Score link by matching intent keywords in the path or anchor
+            # Score both URL and visible anchor text. Real sites often use
+            # opaque paths while the human-readable anchor carries the clue.
             score = 0
+            haystack_url = resolved_link.lower()
+            haystack_anchor = str(anchor_text).lower()
             for kw in intent.keywords:
-                if kw in resolved_link.lower():
+                if kw in haystack_url:
                     score += 1
+                if kw in haystack_anchor:
+                    score += 2
             
             scored_links.append((score, resolved_link))
 
