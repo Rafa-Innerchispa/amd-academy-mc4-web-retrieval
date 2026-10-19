@@ -1,0 +1,39 @@
+name: Match 4 Python validation
+
+on:
+  push:
+    branches:
+      - "chatgpt/mc4-core-20261019"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile
+        run: python -m compileall -q src app tools
+
+      - name: Unit tests
+        run: python -m pytest -q
+
+      - name: Offline benchmark
+        run: PYTHONPATH=. python tools/benchmark_core.py
