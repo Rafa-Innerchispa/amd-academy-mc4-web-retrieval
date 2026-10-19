@@ -397,8 +397,13 @@ class CandidateExtractor:
     def _score_context(self, context: str, intent) -> float:
         lower = context.lower()
         keywords = [k.lower() for k in intent.keywords if len(k) >= 3]
-        matched = sum(1 for kw in keywords if kw in lower)
-        entity_bonus = 1.5 if intent.target_entity and intent.target_entity.lower() in lower else 0.0
+        matched = sum(1 for kw in keywords if self._contains_term(lower, kw))
+        entity_bonus = (
+            1.5
+            if intent.target_entity
+            and self._contains_term(lower, intent.target_entity.lower())
+            else 0.0
+        )
         attr_words = {
             "price": ("price", "cost", "usd", "$"),
             "version": ("version", "release", "firmware"),
@@ -412,6 +417,17 @@ class CandidateExtractor:
         }.get(intent.target_attribute, ())
         attr_bonus = 0.75 * sum(1 for word in attr_words if word in lower)
         return matched * 2.0 + entity_bonus + attr_bonus
+
+    def _contains_term(self, text: str, term: str) -> bool:
+        """Match query terms as lexical units instead of arbitrary substrings."""
+        term = term.strip().lower()
+        if not term:
+            return False
+        return re.search(
+            rf"(?<![A-Za-z0-9_]){re.escape(term)}(?![A-Za-z0-9_])",
+            text,
+            flags=re.IGNORECASE,
+        ) is not None
 
     def _context(self, text: str, start: int, end: int, radius: int = 180) -> str:
         """Return the sentence containing the candidate when possible.
