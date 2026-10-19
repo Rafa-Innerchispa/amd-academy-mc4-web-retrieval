@@ -49,3 +49,26 @@ def test_search_fail_closed_when_discovery_returns_nothing():
 
     assert response.status == "FAIL_CLOSED"
     assert response.failure_reason == "SEARCH_NO_RESULTS"
+
+
+def test_search_http_timeout_is_capped_by_remaining_budget(monkeypatch):
+    from src.search.search_engine import SearchEngine
+
+    class Response:
+        text = "<html></html>"
+
+        def raise_for_status(self):
+            return None
+
+    captured = {}
+
+    def fake_get(url, **kwargs):
+        captured["timeout"] = kwargs["timeout"]
+        return Response()
+
+    monkeypatch.setattr("requests.get", fake_get)
+
+    engine = SearchEngine(timeout_seconds=8.0)
+    engine.search("Widget Pro price", timeout_seconds=0.25)
+
+    assert 0 < captured["timeout"] <= 0.25
