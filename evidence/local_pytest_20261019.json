@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-19",
+  "branch": "chatgpt/mc4-core-20261019",
+  "environment": {
+    "kind": "ChatGPT working container (development validation only)",
+    "python": "3.13.5",
+    "pytest": "9.0.2",
+    "amd_gpu": false
+  },
+  "command": "python3 -m pytest -q",
+  "result": {
+    "passed": 34,
+    "failed": 0,
+    "duration_seconds": 0.13
+  },
+  "caveat": "This is a local functional test run, not AMD hardware or official Match 4 grader validation."
+}
