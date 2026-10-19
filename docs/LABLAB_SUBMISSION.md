@@ -74,7 +74,7 @@ Digest:
 
 Current Python core:
 
-- **25 local tests passed**
+- **22 local tests previously passed; 3 new navigation/entity tests are pending rerun**
 - bounded navigation: PASS
 - fail-closed grounding: PASS
 - JSON-LD extraction: PASS
