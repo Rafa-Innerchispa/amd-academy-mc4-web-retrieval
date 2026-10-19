@@ -101,3 +101,26 @@ def test_planner_frontier_stays_bounded():
     links = [(f"/item/{i}", f"item {i}") for i in range(30)]
     planner._add_to_frontier("https://example.com/start", links, intent)
     assert len(planner._frontier) == 5
+
+
+def test_planner_deduplicates_fragment_variants_but_keeps_query_pages():
+    planner = NavigationPlanner(max_hops=5, lock_domain=True)
+    intent = IntentParser().parse(
+        "Find Widget Pro specifications",
+        explicit_seed_url="https://example.com/product#top",
+    )
+    first = planner.get_initial_step("https://example.com/product#top")
+    assert first.target_url == "https://example.com/product"
+
+    next_step = planner.select_next_step(
+        first.target_url,
+        [
+            ("/product#specs", "Specifications"),
+            ("/product#reviews", "Reviews"),
+            ("/product?page=2#specs", "More specifications"),
+        ],
+        intent,
+    )
+    assert next_step is not None
+    assert next_step.target_url == "https://example.com/product?page=2"
+    assert len(planner.visited_urls) == 2
