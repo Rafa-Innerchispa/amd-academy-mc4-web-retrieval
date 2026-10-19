@@ -16,6 +16,17 @@ AMD AI League on LabLab:
 Public League page:
 https://lablab.ai/ai-hackathons/amd-lablab-ai-academy-challenge
 
+## Official release-state verification — 2026-10-19
+
+Two first-party LabLab sources were rechecked:
+
+1. The live AMD AI League event page explicitly lists Match 4 as **Live now**, ending **October 27**, worth **1,800 points**, with the mission to build an agent that navigates websites, understands a natural-language request, and retrieves the specific information requested.
+2. The official LabLab announcement email dated **October 13, 2026** ("Match 3 is closed - Match 4 starts now!") repeats the same mission, deadline and point value.
+
+The event page exposes a downloadable starter kit and a real Google Drive challenge brief for Match 3. In contrast, the visible Match 4 **View match details** control currently has no usable external destination; following it returns to the League page. The official launch email has no Match 4 attachment and contains no grader, Docker, schema, network, or selfcheck details.
+
+Therefore, as of 2026-10-19, we have strong first-party confirmation of the **task mission and schedule**, but no publicly recoverable first-party Match 4 technical contract. This is a publication-state gap, not permission to infer the missing grader rules from competitor implementations.
+
 ## Live LabLab submission-form check — 2026-10-19
 
 An authenticated read of the team's current LabLab submission form shows Step 1 exposing exactly these challenge-artifact fields:
