@@ -27,7 +27,7 @@ Implemented on the active development branch:
 - isolated polished demo UI under `demo/`
 - additional tests for candidate ranking and URL safety
 
-The graded adapter is intentionally **not frozen yet** because the public Match 4 page currently does not expose a usable starter-kit/grader-detail destination. The Python core has now passed **22 local tests**. The official MC3 starter kit also confirms a reusable programme-level Docker pattern, so a provisional ROCm container baseline and selfcheck have been added without pretending the Match 4 invocation schema is known.
+The graded adapter is intentionally **not frozen yet** because the public Match 4 page currently does not expose a usable starter-kit/grader-detail destination. The Python core has now passed **25 local tests**. The official MC3 starter kit also confirms a reusable programme-level Docker pattern, so a provisional ROCm container baseline and selfcheck have been added without pretending the Match 4 invocation schema is known.
 
 See [docs/CHALLENGE_CONTRACT.md](docs/CHALLENGE_CONTRACT.md).
 
