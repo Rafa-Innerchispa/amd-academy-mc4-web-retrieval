@@ -90,3 +90,14 @@ Do **not** mark Match 4 READY until all of these exist:
 The `demo/` UI is a presentation and product-use layer only.
 
 The future graded container must remain minimal and must not depend on the demo UI unless the official grader explicitly requires a web interface.
+
+
+## Programme-level evidence from the official MC3 starter kit
+
+The user-provided official MC3 starter kit states that the container rules are the same for every challenge in the programme. It also confirms that MC2 and MC3 use the same ROCm base, the same image-size/VRAM rules, and the same no-server/no-port container shape.
+
+This is strong evidence for preparing the Match 4 container baseline now, while still keeping the Match 4-specific grader invocation and output schema unfrozen.
+
+One important consequence is network topology: MC3 evaluation has no outbound network. Match 4 is a web-navigation task, so the official Match 4 kit may provide websites through an internal/sandbox network rather than the public internet. The retrieval engine therefore blocks private targets by default but supports an explicit allowlist for grader-provided internal hosts. We will not enable broad private-network access unless the official Match 4 contract requires it.
+
+See `docs/MC3_STARTER_KIT_LESSONS.md`.
