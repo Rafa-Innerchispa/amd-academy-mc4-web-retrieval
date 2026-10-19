@@ -69,6 +69,7 @@ class CandidateExtractor:
         candidates.extend(self._from_text(cleaned_text, intent))
         candidates.extend(self._from_tables(html, intent))
         candidates.extend(self._from_json_ld(html, intent))
+        candidates.extend(self._from_contact_links(html, intent))
         return self._dedupe_rank(candidates)
 
     def best(self, html: str, cleaned_text: str, intent) -> Optional[Candidate]:
@@ -78,13 +79,15 @@ class CandidateExtractor:
     def _from_text(self, text: str, intent) -> List[Candidate]:
         attr = self._effective_attribute(intent)
         patterns = self.PATTERNS.get(attr, [])
+        if attr == "person":
+            return self._person_candidates(text, intent)
         if not patterns and attr == "general_information":
             return self._general_sentences(text, intent)
 
         found: List[Candidate] = []
         for pattern in patterns:
             for match in re.finditer(pattern, text, flags=re.IGNORECASE):
-                value = match.group(0).strip()
+                value = self._normalize_value(match.group(0).strip(), attr)
                 context = self._context(text, match.start(), match.end())
                 found.append(
                     Candidate(
@@ -112,6 +115,25 @@ class CandidateExtractor:
                                 source_kind="table",
                             )
                         )
+        return out
+
+    def _from_contact_links(self, html: str, intent) -> List[Candidate]:
+        attr = self._effective_attribute(intent)
+        if attr not in {"email", "phone"}:
+            return []
+        values = self.dom.extract_contact_values(html).get(attr, [])
+        out: List[Candidate] = []
+        for value in values:
+            normalized = self._normalize_value(value, attr)
+            context = f"{attr}: {normalized}"
+            out.append(
+                Candidate(
+                    value=normalized,
+                    context=context,
+                    score=self._score_context(context, intent) + 2.5,
+                    source_kind=f"{attr}_link",
+                )
+            )
         return out
 
     def _from_json_ld(self, html: str, intent) -> List[Candidate]:
@@ -154,6 +176,38 @@ class CandidateExtractor:
         else:
             yield path, value
 
+    def _person_candidates(self, text: str, intent) -> List[Candidate]:
+        labels = r"(?:CEO|chief executive officer|founder|co-founder|author|creator|director|president)"
+        pattern = re.compile(
+            labels
+            + r"\\s*(?:is|:|-)?\\s*"
+            + r"([A-Z][A-Za-z.'’-]+(?:\\s+[A-Z][A-Za-z.'’-]+){1,3})",
+            re.IGNORECASE,
+        )
+        out: List[Candidate] = []
+        for match in pattern.finditer(text):
+            value = match.group(1).strip()
+            context = self._context(text, match.start(), match.end())
+            out.append(
+                Candidate(
+                    value=value,
+                    context=context,
+                    score=self._score_context(context, intent) + 1.0,
+                    source_kind="text",
+                )
+            )
+        return out
+
+    def _normalize_value(self, value: str, attr: str) -> str:
+        value = re.sub(r"\\s+", " ", value).strip()
+        if attr == "version":
+            value = re.sub(r"^(?:version\\s+|v(?=\\d))", "", value, flags=re.IGNORECASE)
+        if attr == "phone":
+            value = value.strip(" .,;:")
+        if attr == "email":
+            value = value.strip(" .,;:")
+        return value
+
     def _general_sentences(self, text: str, intent) -> List[Candidate]:
         parts = re.split(r"(?<=[.!?])\s+", text)
         out: List[Candidate] = []
@@ -187,7 +241,10 @@ class CandidateExtractor:
         patterns = self.PATTERNS.get(attr, [])
         values: List[str] = []
         for pattern in patterns:
-            values.extend(m.group(0).strip() for m in re.finditer(pattern, fragment, flags=re.IGNORECASE))
+            values.extend(
+                self._normalize_value(m.group(0).strip(), attr)
+                for m in re.finditer(pattern, fragment, flags=re.IGNORECASE)
+            )
         if not values and attr == "general_information" and fragment.strip():
             values.append(fragment.strip())
         return values
