@@ -28,7 +28,8 @@ class NavigationPlanner:
         if len(self.navigation_trail) >= self.max_hops:
             return None
 
-        current_domain = urlparse(current_url).netloc
+        current_parsed = urlparse(current_url)
+        current_domain = (current_parsed.hostname or "").rstrip(".").lower()
 
         scored_links = []
         for raw_link in available_links:
@@ -42,8 +43,11 @@ class NavigationPlanner:
             resolved_link = urljoin(current_url, href)
             parsed_resolved = urlparse(resolved_link)
 
-            # Domain lock validation
-            if self.lock_domain and parsed_resolved.netloc and parsed_resolved.netloc != current_domain:
+            # Domain lock validation. Compare normalized hostnames rather than
+            # raw netloc so case, a trailing dot, or an explicit default port
+            # cannot accidentally change same-site behavior.
+            resolved_domain = (parsed_resolved.hostname or "").rstrip(".").lower()
+            if self.lock_domain and resolved_domain and resolved_domain != current_domain:
                 continue
 
             # Loop prevention
