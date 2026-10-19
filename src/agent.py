@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 
 from .browser.navigation_engine import NavigationEngine
@@ -36,6 +37,7 @@ class WebRetrievalAgent:
         self.provenance_tracker = ProvenanceTracker()
 
     def execute(self, request: RetrievalRequest) -> RetrievalResponse:
+        started = time.monotonic()
         intent = self.parser.parse(request.query, explicit_seed_url=request.seed_url)
 
         if not intent.inferred_seed_url:
@@ -55,6 +57,18 @@ class WebRetrievalAgent:
         all_steps = [current_step]
 
         while current_step:
+            if time.monotonic() - started >= self.config.total_budget_seconds:
+                return RetrievalResponse(
+                    status="FAIL_CLOSED",
+                    query=request.query,
+                    verification_status=VerificationStatus.REJECTED_UNVERIFIED,
+                    navigation_trail=all_steps,
+                    failure_reason="TIME_BUDGET_EXCEEDED",
+                    metadata={
+                        "elapsed_seconds": round(time.monotonic() - started, 3),
+                    },
+                )
+
             snapshot = self.browser.fetch(current_step.target_url)
 
             if snapshot.status_code == 200:
@@ -83,6 +97,7 @@ class WebRetrievalAgent:
                             metadata={
                                 "candidate_source_kind": candidate.source_kind,
                                 "candidate_score": round(candidate.score, 3),
+                                "elapsed_seconds": round(time.monotonic() - started, 3),
                             },
                         )
 
@@ -101,4 +116,7 @@ class WebRetrievalAgent:
             verification_status=VerificationStatus.REJECTED_UNVERIFIED,
             navigation_trail=all_steps,
             failure_reason="CLAIM_NOT_FOUND_OR_UNVERIFIED_IN_EVIDENCE",
+            metadata={
+                "elapsed_seconds": round(time.monotonic() - started, 3),
+            },
         )
