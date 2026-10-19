@@ -25,6 +25,8 @@ class WebRetrievalAgent:
         self.browser = NavigationEngine(
             timeout=self.config.request_timeout_seconds,
             user_agent=self.config.user_agent,
+            allow_private_network_targets=self.config.allow_private_network_targets,
+            allowed_private_hosts=self.config.allowed_private_hosts,
         )
         self.extractor = DOMExtractor()
         self.candidates = CandidateExtractor()
