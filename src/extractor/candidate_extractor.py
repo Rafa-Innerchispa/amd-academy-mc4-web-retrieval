@@ -104,9 +104,12 @@ class CandidateExtractor:
         for pattern in patterns:
             for match in re.finditer(pattern, text, flags=re.IGNORECASE):
                 value = self._normalize_value(match.group(0).strip(), attr)
-                context = self._context(text, match.start(), match.end())
-                if self._looks_like_untrusted_instruction(context):
+                guard_context = text[
+                    max(0, match.start() - 240): min(len(text), match.end() + 240)
+                ]
+                if self._looks_like_untrusted_instruction(guard_context):
                     continue
+                context = self._context(text, match.start(), match.end())
                 found.append(
                     Candidate(
                         value=value,
@@ -237,9 +240,12 @@ class CandidateExtractor:
         out: List[Candidate] = []
         for match in pattern.finditer(text):
             value = self._normalize_value(match.group(1).strip(), "person")
-            context = self._context(text, match.start(), match.end())
-            if self._looks_like_untrusted_instruction(context):
+            guard_context = text[
+                max(0, match.start() - 240): min(len(text), match.end() + 240)
+            ]
+            if self._looks_like_untrusted_instruction(guard_context):
                 continue
+            context = self._context(text, match.start(), match.end())
             out.append(
                 Candidate(
                     value=value,
