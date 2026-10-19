@@ -48,7 +48,7 @@ Result:
 
 - **9/9 cases PASS**
 - exact-case accuracy: **1.0**
-- mocked p50: **0.592 ms**
-- mocked p95: **86.704 ms**
+- CI mocked p50: **1.364 ms**
+- CI mocked p95: **36.989 ms**
 
 These timings come from mocked local pages in a development container. They are useful regression evidence, not AMD hardware performance and not an official competition score.
