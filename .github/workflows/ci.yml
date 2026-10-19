@@ -53,3 +53,17 @@ jobs:
             pytest-output.txt
             benchmark-output.txt
           if-no-files-found: ignore
+
+
+  container-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build lightweight packaging image
+        run: docker build -f docker/Dockerfile.ci-smoke -t mc4-ci-smoke .
+
+      - name: Run isolated container smoke
+        run: docker run --rm --network none mc4-ci-smoke python3 /app/ci_container_smoke.py
