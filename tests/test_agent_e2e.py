@@ -62,3 +62,36 @@ def test_agent_fails_closed_when_info_not_found():
     assert resp.status == "FAIL_CLOSED"
     assert resp.verification_status == VerificationStatus.REJECTED_UNVERIFIED
     assert resp.failure_reason == "CLAIM_NOT_FOUND_OR_UNVERIFIED_IN_EVIDENCE"
+
+
+def test_agent_skips_unrelated_price_and_follows_relevant_link():
+    agent = WebRetrievalAgent()
+    agent.browser.register_mock(
+        "https://shop.test/start",
+        """
+        <html><body>
+          <p>Standard shipping costs $19.99.</p>
+          <a href="/p/999">R9700 workstation details and price</a>
+        </body></html>
+        """,
+    )
+    agent.browser.register_mock(
+        "https://shop.test/p/999",
+        """
+        <html><body>
+          <h1>R9700 workstation</h1>
+          <p>R9700 workstation current price: $1299.00 USD.</p>
+        </body></html>
+        """,
+    )
+    resp = agent.execute(
+        RetrievalRequest(
+            query="What is the price of the R9700 workstation?",
+            seed_url="https://shop.test/start",
+            max_hops=3,
+        )
+    )
+    assert resp.status == "SUCCESS"
+    assert resp.answer == "$1299.00"
+    assert resp.provenance is not None
+    assert resp.provenance.source_url == "https://shop.test/p/999"
