@@ -58,7 +58,33 @@ class WebRetrievalAgent:
                     failure_reason="NO_SEED_URL",
                 )
 
-            search_results = self.search.search(request.query)
+            remaining_search_budget = deadline - time.monotonic()
+            if remaining_search_budget <= 0:
+                return RetrievalResponse(
+                    status="FAIL_CLOSED",
+                    query=request.query,
+                    verification_status=VerificationStatus.REJECTED_UNVERIFIED,
+                    failure_reason="TIME_BUDGET_EXCEEDED",
+                    metadata={
+                        "elapsed_seconds": round(time.monotonic() - started, 3),
+                    },
+                )
+
+            search_results = self.search.search(
+                request.query,
+                timeout_seconds=remaining_search_budget,
+            )
+            if time.monotonic() >= deadline:
+                return RetrievalResponse(
+                    status="FAIL_CLOSED",
+                    query=request.query,
+                    verification_status=VerificationStatus.REJECTED_UNVERIFIED,
+                    failure_reason="TIME_BUDGET_EXCEEDED",
+                    metadata={
+                        "elapsed_seconds": round(time.monotonic() - started, 3),
+                    },
+                )
+
             if not search_results:
                 return RetrievalResponse(
                     status="FAIL_CLOSED",
