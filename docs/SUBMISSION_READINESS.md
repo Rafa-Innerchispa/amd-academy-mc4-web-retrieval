@@ -66,6 +66,8 @@ Results:
 - **compileall: PASS**
 - **40 tests passed**
 - offline benchmark: **9/9 PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39315320387, network disabled, fail-closed adapter output, no demo TCP port)
+
 - exact-case accuracy: **1.0**
 - CI mocked latency p50: **1.364 ms**
 - CI mocked latency p95: **36.989 ms**
@@ -114,6 +116,7 @@ Before marking READY:
 - [x] thin provisional grader adapter implemented
 - [ ] adapter narrowed to the official contract
 - [ ] official sample/selfcheck green
+- [x] lightweight CI container packaging smoke green
 - [ ] Docker image built on AMD host
 - [ ] AMD GPU use proven
 - [ ] VRAM peak recorded
