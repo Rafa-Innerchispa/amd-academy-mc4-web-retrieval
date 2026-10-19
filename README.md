@@ -39,12 +39,12 @@ Implemented on the development branch:
 
 Development validation on the current implementation:
 
-- **37 tests passed**
+- **40 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
 - offline retrieval benchmark: **9/9 cases PASS**
 - exact-case accuracy: **1.0**
-- CI mocked benchmark p50: **1.364 ms**
-- CI mocked benchmark p95: **36.989 ms**
+- CI mocked benchmark p50: **1.416 ms**
+- CI mocked benchmark p95: **35.885 ms**
 
 Evidence:
 
