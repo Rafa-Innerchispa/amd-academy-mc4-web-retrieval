@@ -139,8 +139,8 @@ def test_agent_backtracks_from_relevant_decoy_to_second_candidate():
         "https://shop.test/start",
         """
         <html><body>
-          <a href="/news">Widget Pro price announcement</a>
-          <a href="/product">Widget Pro product price</a>
+          <a href="/news">Widget Pro price current official announcement</a>
+          <a href="/product">Widget Pro details</a>
         </body></html>
         """,
     )
