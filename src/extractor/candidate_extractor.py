@@ -199,34 +199,25 @@ class CandidateExtractor:
         return matched * 2.0 + entity_bonus + attr_bonus
 
     def _context(self, text: str, start: int, end: int, radius: int = 180) -> str:
-        """Prefer the local sentence so unrelated nearby values do not tie.
+        """Return the sentence containing the candidate when possible.
 
-        If sentence boundaries are unavailable, fall back to a bounded character
-        window. This matters on product pages where several prices/versions often
-        appear close together.
+        Sentence boundaries are punctuation followed by whitespace/end, so
+        decimal/version dots such as 6.2 or 10.1.0 are not mistaken for stops.
         """
-        left_candidates = [
-            text.rfind(".", 0, start),
-            text.rfind("!", 0, start),
-            text.rfind("?", 0, start),
-            text.rfind("\n", 0, start),
-        ]
-        right_candidates = [
-            idx for idx in (
-                text.find(".", end),
-                text.find("!", end),
-                text.find("?", end),
-                text.find("\n", end),
-            )
-            if idx != -1
-        ]
+        boundaries = [0]
+        boundaries.extend(
+            match.end()
+            for match in re.finditer(r"[.!?](?=\\s|$)", text)
+        )
+        if boundaries[-1] != len(text):
+            boundaries.append(len(text))
 
-        sentence_left = max(left_candidates) + 1
-        sentence_right = min(right_candidates) + 1 if right_candidates else len(text)
-        sentence = text[sentence_left:sentence_right].strip()
-
-        if sentence and len(sentence) <= radius * 2:
-            return sentence
+        for left, right in zip(boundaries, boundaries[1:]):
+            if left <= start < right:
+                sentence = text[left:right].strip()
+                if sentence and len(sentence) <= radius * 2:
+                    return sentence
+                break
 
         left = max(0, start - radius)
         right = min(len(text), end + radius)
