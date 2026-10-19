@@ -47,6 +47,7 @@ class ProvenanceRecord(BaseModel):
     char_offset_end: int
     verbatim_text: str
     timestamp_utc: str
+    coordinate_space: str = Field(default="cleaned_text", description="cleaned_text or raw_html")
 
 
 class RetrievalResponse(BaseModel):
