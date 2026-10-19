@@ -6,7 +6,7 @@ Date: 2026-10-19
 
 **NOT READY FOR FINAL LABLAB SUBMISSION YET**
 
-The core is actively developed and locally validated, but the official Match 4 grader/starter-kit contract and the LabLab Match 4 image field are not yet exposed in the public flow we can verify.
+The core, provisional adapter, validation harness and container baseline are implemented. The remaining blockers are the official Match 4 grader/starter-kit contract, AMD physical image validation, public artifact verification and the LabLab Match 4 submission route.
 
 ## Human task
 
@@ -29,36 +29,57 @@ https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval/pull/2
 - [x] bounded navigation
 - [x] loop prevention
 - [x] same-domain lock by default
+- [x] URL + anchor-text ranking
 - [x] natural-language intent parsing
 - [x] exact-value candidate extraction
-- [x] price/date/version/contact/spec patterns
+- [x] price/date/version/contact/hours/count/person/spec patterns
 - [x] HTML table extraction
 - [x] JSON-LD extraction
 - [x] fail-closed verification
+- [x] structured-data raw-HTML grounding
 - [x] evidence URL + snapshot hash
 - [x] SSRF/private-network protection by default
 - [x] redirect validation before following
 - [x] explicit internal-grader-host allowlist support
+- [x] wall-clock retrieval budget
+- [x] atomic output writer
+- [x] provisional `/app/app.py` compatibility adapter
 - [x] isolated demo UI
 - [x] provisional programme-level Docker baseline
 - [x] programme-level Docker selfcheck
+- [x] one-command offline validation
 - [x] MC3 starter-kit lessons captured
+- [x] LabLab submission draft prepared
 
-## Local validation
+## Local functional validation
 
-A local mirror of the current branch source/tests was executed with:
+Executed against the current implementation:
 
-`python -m pytest -q`
+```bash
+python3 -m compileall -q src app tools
+python3 -m pytest -q
+PYTHONPATH=. python3 tools/benchmark_core.py
+```
 
-Result:
+Results:
 
-**22 last verified; 3 new navigation/entity tests pending rerun**
+- **compileall: PASS**
+- **34 tests passed**
+- offline benchmark: **9/9 PASS**
+- exact-case accuracy: **1.0**
+- mocked latency p50: **0.592 ms**
+- mocked latency p95: **86.704 ms**
 
-This validates the Python retrieval core and safety tests. It is **not** a substitute for final AMD Docker validation.
+Evidence:
+
+- `evidence/local_pytest_20261019.json`
+- `evidence/offline_benchmark_20261019.json`
+
+These are development-container functional results. They are not AMD GPU metrics and are not an official Match 4 grader score.
 
 ## Program-level container baseline learned from the official MC3 starter kit
 
-The official MC3 kit states that container rules are shared across the challenge programme. It confirms, at minimum, the programme pattern of:
+The official MC3 kit states that container rules are shared across the challenge programme. It confirms the programme pattern of:
 
 - Docker submission
 - ROCm base image
@@ -72,9 +93,9 @@ MC2 and MC3 use:
 
 `rocm/pytorch:rocm10.0_ubuntu26.04_py3.14_pytorch_release_2.13.0`
 
-The Match 4 repository now includes a **provisional** baseline Dockerfile using that image. It will not be tagged as final until the Match 4 kit confirms the exact contract.
+The provisional Match 4 Dockerfile now uses that base, copies `src/` and `app/app.py`, and retains the exec-based no-port container shape.
 
-## Critical unknowns blocking final image
+## Critical unknowns blocking the final image
 
 - [ ] exact Match 4 grader invocation
 - [ ] exact input schema
@@ -83,14 +104,15 @@ The Match 4 repository now includes a **provisional** baseline Dockerfile using 
 - [ ] exact time budgets
 - [ ] exact image-size and VRAM repetition for Match 4
 - [ ] exact Match 4 sample/selfcheck
-- [ ] LabLab Match 4 image submission field or equivalent route
+- [ ] LabLab Match 4 image field or equivalent submission route
 
 ## Final-image gates
 
 Before marking READY:
 
 - [ ] official Match 4 contract recovered
-- [ ] thin grader adapter implemented
+- [x] thin provisional grader adapter implemented
+- [ ] adapter narrowed to the official contract
 - [ ] official sample/selfcheck green
 - [ ] Docker image built on AMD host
 - [ ] AMD GPU use proven
