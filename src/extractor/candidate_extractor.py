@@ -150,6 +150,8 @@ class CandidateExtractor:
         for table in self.dom.extract_tables(html):
             for row in table:
                 row_text = " | ".join(f"{k}: {v}" for k, v in row.items())
+                if self._looks_like_untrusted_instruction(row_text):
+                    continue
                 score = self._score_context(row_text, intent) + 1.5
                 for value in row.values():
                     for candidate in self._extract_values_from_fragment(str(value), intent):
@@ -200,6 +202,8 @@ class CandidateExtractor:
                 fragment = str(value)
                 path_text = " ".join(path)
                 context = f"{path_text}: {fragment}".strip()
+                if self._looks_like_untrusted_instruction(context):
+                    continue
                 score = self._score_context(context, intent) + 2.0
                 for candidate in self._extract_values_from_fragment(fragment, intent):
                     out.append(
@@ -234,6 +238,8 @@ class CandidateExtractor:
         for match in pattern.finditer(text):
             value = self._normalize_value(match.group(1).strip(), "person")
             context = self._context(text, match.start(), match.end())
+            if self._looks_like_untrusted_instruction(context):
+                continue
             out.append(
                 Candidate(
                     value=value,
@@ -256,6 +262,8 @@ class CandidateExtractor:
         parts = re.split(r"(?<=[.!?])\s+", text)
         out: List[Candidate] = []
         for sentence in parts:
+            if self._looks_like_untrusted_instruction(sentence):
+                continue
             score = self._score_context(sentence, intent)
             if score > 0 and 2 <= len(sentence.split()) <= 45:
                 out.append(
