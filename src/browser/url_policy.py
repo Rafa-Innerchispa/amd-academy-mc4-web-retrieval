@@ -10,11 +10,7 @@ class URLPolicyError(ValueError):
 
 
 class URLPolicy:
-    """Basic SSRF guard for live retrieval.
-
-    Only http/https URLs are accepted. Literal and resolved private, loopback,
-    link-local, multicast and reserved addresses are rejected.
-    """
+    """Reject non-public retrieval targets before any network request."""
 
     def validate(self, url: str) -> str:
         parsed = urlparse(url)
@@ -22,32 +18,43 @@ class URLPolicy:
             raise URLPolicyError("UNSUPPORTED_URL_SCHEME")
         if not parsed.hostname:
             raise URLPolicyError("URL_HOST_REQUIRED")
+
         host = parsed.hostname.rstrip(".").lower()
         if host in {"localhost", "localhost.localdomain"} or host.endswith(".localhost"):
             raise URLPolicyError("LOCALHOST_BLOCKED")
 
+        # Parse literal IPs without accidentally swallowing our own policy error.
         try:
             literal = ipaddress.ip_address(host)
+        except ValueError:
+            literal = None
+
+        if literal is not None:
             self._reject_ip(literal)
             return url
-        except ValueError:
-            pass
 
         try:
-            infos = socket.getaddrinfo(host, parsed.port or (443 if parsed.scheme == "https" else 80), type=socket.SOCK_STREAM)
+            infos = socket.getaddrinfo(
+                host,
+                parsed.port or (443 if parsed.scheme == "https" else 80),
+                type=socket.SOCK_STREAM,
+            )
         except socket.gaierror:
-            # DNS failure is a retrieval error, not proof that the URL is unsafe.
+            # DNS failure is handled by the fetch layer. It is not itself a
+            # reason to classify the URL as a private target.
             return url
 
         for info in infos:
             address = info[4][0]
             try:
-                self._reject_ip(ipaddress.ip_address(address))
+                resolved = ipaddress.ip_address(address)
             except ValueError:
                 continue
+            self._reject_ip(resolved)
+
         return url
 
-    def _reject_ip(self, ip: ipaddress._BaseAddress) -> None:
+    def _reject_ip(self, ip) -> None:
         if (
             ip.is_private
             or ip.is_loopback
