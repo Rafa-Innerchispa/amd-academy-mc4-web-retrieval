@@ -9,6 +9,7 @@ class AgentConfig(BaseModel):
     max_dom_char_length: int = Field(default=100000, description="Truncation limit for DOM extraction")
     verification_threshold: float = Field(default=0.85, description="Minimum confidence for fuzzy grounding")
     max_candidates_per_page: int = Field(default=8, description="Maximum ranked candidates verified per page")
+    min_candidate_score: float = Field(default=2.0, description="Minimum contextual relevance score before accepting a candidate")
     user_agent: str = Field(
         default="InnerOS-AMD-MC4-WebRetrieval/0.2 (+https://github.com/Rafa-Innerchispa)",
         description="Polite crawler user-agent header",
