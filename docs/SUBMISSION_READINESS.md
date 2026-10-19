@@ -26,7 +26,7 @@ https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval/pull/2
 
 ## Implemented
 
-- [x] bounded navigation
+- [x] bounded best-first navigation with dead-end backtracking
 - [x] loop prevention
 - [x] same-domain lock by default
 - [x] URL + anchor-text ranking
@@ -35,11 +35,13 @@ https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval/pull/2
 - [x] price/date/version/contact/hours/count/person/spec patterns
 - [x] HTML table extraction
 - [x] JSON-LD extraction
+- [x] raw JSON/API response extraction
 - [x] fail-closed verification
 - [x] structured-data raw-HTML grounding
 - [x] evidence URL + snapshot hash
 - [x] SSRF/private-network protection by default
 - [x] redirect validation before following
+- [x] cross-domain redirect escape blocking
 - [x] explicit internal-grader-host allowlist support
 - [x] wall-clock retrieval budget
 - [x] atomic output writer
@@ -64,16 +66,21 @@ PYTHONPATH=. python3 tools/benchmark_core.py
 Results:
 
 - **compileall: PASS**
-- **40 tests passed**
-- offline benchmark: **9/9 PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39315320387, network disabled, fail-closed adapter output, no demo TCP port)
+- **52 tests passed**
+- offline benchmark: **12/12 PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39323157430)
+- cross-domain redirect regression: **PASS**
+- structured prompt-injection regressions: **PASS**
+- JSON/API extraction regressions: **PASS**
+- decoy-link backtracking E2E: **PASS**
 
 - exact-case accuracy: **1.0**
-- CI mocked latency p50: **1.364 ms**
-- CI mocked latency p95: **36.989 ms**
+- CI mocked latency p50: **0.98 ms**
+- CI mocked latency p95: **1.515 ms**
 
 Evidence:
 
+- `evidence/ci_validation_20261019.json`
 - `evidence/local_pytest_20261019.json`
 - `evidence/offline_benchmark_20261019.json`
 
