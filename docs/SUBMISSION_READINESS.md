@@ -66,17 +66,17 @@ PYTHONPATH=. python3 tools/benchmark_core.py
 Results:
 
 - **compileall: PASS**
-- **52 tests passed**
-- offline benchmark: **12/12 PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39323157430)
+- **63 tests passed**
+- offline benchmark: **all current cases PASS**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39324279750)
 - cross-domain redirect regression: **PASS**
 - structured prompt-injection regressions: **PASS**
 - JSON/API extraction regressions: **PASS**
 - decoy-link backtracking E2E: **PASS**
 
 - exact-case accuracy: **1.0**
-- CI mocked latency p50: **0.98 ms**
-- CI mocked latency p95: **1.515 ms**
+- CI mocked latency p50: **2.167 ms**
+- CI mocked latency p95: **3.837 ms**
 
 Evidence:
 
