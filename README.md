@@ -9,27 +9,49 @@
 
 ## Current state
 
-This repository has moved beyond the original scaffold.
+This repository is now an active Match 4 implementation rather than a scaffold.
 
-Implemented on the active development branch:
+Implemented on the development branch:
 
 - bounded same-domain navigation with loop prevention
+- URL + visible-anchor ranking for opaque links
 - deterministic intent parsing
 - context-ranked exact-value extraction
-- support for dates, versions, prices, email, phone and technical values
+- prices, dates, versions, email, phone, opening hours, counts, people and technical values
 - HTML table extraction
 - JSON-LD extraction
+- mailto/tel extraction
 - exact/fuzzy evidence verification
-- SHA-256 snapshot provenance
+- raw-HTML grounding for structured data
+- SHA-256 provenance with coordinate-space tracking
 - fail-closed behavior when evidence is insufficient
-- SSRF guard for localhost/private/link-local/reserved targets
-- redirect target revalidation
-- isolated polished demo UI under `demo/`
-- additional tests for candidate ranking and URL safety
+- SSRF/private/link-local/loopback blocking by default
+- redirect validation before following
+- explicit allowlist for grader-provided internal hosts
+- bounded wall-clock retrieval budget
+- atomic JSON output helpers
+- provisional `/app/app.py` grader adapter
+- isolated product/demo UI under `demo/`
+- provisional ROCm programme-level Docker baseline
+- repeatable offline validation and image-release runbooks
 
-The graded adapter is intentionally **not frozen yet** because the public Match 4 page currently does not expose a usable starter-kit/grader-detail destination. The Python core has now passed **22 previously verified local tests; 3 new navigation/entity tests pending rerun**. The official MC3 starter kit also confirms a reusable programme-level Docker pattern, so a provisional ROCm container baseline and selfcheck have been added without pretending the Match 4 invocation schema is known.
+## Current local evidence
 
-See [docs/CHALLENGE_CONTRACT.md](docs/CHALLENGE_CONTRACT.md).
+Development validation on the current implementation:
+
+- **34 tests passed**
+- `python3 -m compileall -q src app tools`: **PASS**
+- offline retrieval benchmark: **9/9 cases PASS**
+- exact-case accuracy: **1.0**
+- mocked benchmark p50: **0.592 ms**
+- mocked benchmark p95: **86.704 ms**
+
+Evidence:
+
+- `evidence/local_pytest_20261019.json`
+- `evidence/offline_benchmark_20261019.json`
+
+These are local functional results, **not AMD hardware performance and not an official LabLab score**.
 
 ## Architecture
 
@@ -47,7 +69,8 @@ Natural-language request
           │
           ├── clean text
           ├── tables
-          └── JSON-LD
+          ├── JSON-LD
+          └── mailto / tel
           │
           ▼
  Context-ranked candidates
@@ -59,7 +82,7 @@ Natural-language request
           └── verified → exact answer + source + snapshot hash
 ```
 
-The design favors grounded extraction over free-form synthesis. A local AMD/ROCm model can be added as a reranker or difficult-case extractor once the official grader budget and runtime contract are known.
+The design favors grounded extraction over free-form synthesis. A local AMD/ROCm model can still be added as a difficult-case reranker once the official grader budget and runtime contract are known.
 
 ## Quickstart
 
@@ -67,7 +90,7 @@ The design favors grounded extraction over free-form synthesis. A local AMD/ROCm
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pytest -v tests/
+bash scripts/run_offline_validation.sh
 ```
 
 CLI:
@@ -79,9 +102,15 @@ python3 -m src.cli \
   --json
 ```
 
+## Provisional grader adapter
+
+The branch includes `app/app.py` as a tolerant compatibility layer while the official Match 4 contract remains unavailable publicly.
+
+It supports common query/ID/start-URL aliases, batch JSON input, atomic output, and fail-closed empty results. This adapter is intentionally replaceable and will be narrowed to the exact official schema once AMD/LabLab publishes the Match 4 starter kit.
+
 ## Demo UI
 
-The product/demo layer is separate from the future grader image:
+The product/demo layer is separate from the graded image:
 
 ```bash
 python -m demo.server
@@ -93,38 +122,44 @@ Open:
 http://127.0.0.1:8787
 ```
 
-The UI shows:
+It shows the requested fact, verified answer, evidence source, evidence excerpt, snapshot SHA-256, navigation trail and explicit fail-closed state.
 
-- requested fact
-- verified answer
-- exact evidence source
-- evidence excerpt
-- snapshot SHA-256
-- navigation trail
-- explicit fail-closed state
+## Programme-level container baseline
 
-This makes the capability useful and presentable without forcing presentation dependencies into the grader contract.
+The user-provided official MC3 starter kit says container rules are shared across the challenge programme and that MC2/MC3 use the same base image, size/VRAM rules and no-server/no-port shape.
+
+This repo therefore includes:
+
+- `docker/Dockerfile.contract-baseline`
+- `.dockerignore`
+- `tools/selfcheck_program_rules.py`
+- `scripts/build_contract_baseline.sh`
+- `scripts/validate_contract_baseline.sh`
+- `docs/MC3_STARTER_KIT_LESSONS.md`
+- `docs/IMAGE_RELEASE_RUNBOOK.md`
+- `docs/SUBMISSION_READINESS.md`
+- `docs/LABLAB_SUBMISSION.md`
+
+The provisional Dockerfile already copies the retrieval core and `/app/app.py` into the ROCm 10 baseline while keeping the no-port execution model.
 
 ## Submission strategy
 
-Priority order:
-
-1. recover official current Match 4 grader/starter-kit contract
-2. adapt the thin grader entrypoint
-3. run full tests and held-out retrieval cases
-4. build the exact required AMD/ROCm Docker image
-5. validate on AMD hardware
-6. publish image to a public registry
+1. recover the official Match 4 starter kit / grader contract
+2. reduce the compatibility adapter to the exact required schema
+3. run official sample/selfcheck
+4. build on AMD hardware
+5. prove GPU use, timing, VRAM and uncompressed image size
+6. publish the public image
 7. verify anonymous pull
-8. re-run from the pulled public artifact
+8. re-run the pulled image on AMD
 9. record immutable digest
-10. submit as soon as LabLab exposes or documents the Match 4 image field
+10. submit when LabLab exposes or documents the Match 4 submission route
 
 ## Truth boundary
 
-The public League page confirms the Match, dates, points and mission. It does **not**, at the time of this review, expose a usable Match 4 starter-kit/detail destination from the visible public control.
+The public League page confirms Match 4, dates, points and mission. It does not currently expose a usable Match 4 starter-kit/detail destination from the visible public control.
 
-Accordingly, this repository does not present guessed Docker/grader details as official requirements.
+Accordingly, this repository does not present guessed Match 4 grader details as official requirements.
 
 ## Project family
 
@@ -132,19 +167,4 @@ Canonical AMD AI League umbrella:
 
 https://github.com/Rafa-Innerchispa/inneros-amd-ai-league-2026
 
-Match 2 and Match 3 remain independently verified artifacts. Match 4 is an active development lane and will only be promoted in the umbrella as VERIFIED after the public container and grader evidence are complete.
-
-
-## Programme-level container baseline
-
-The user-provided official MC3 starter kit explicitly says that container rules are shared across the challenge programme and that MC2/MC3 use the same base image, size/VRAM rules and no-server/no-port shape.
-
-This repo therefore now includes:
-
-- `docker/Dockerfile.contract-baseline`
-- `tools/selfcheck_program_rules.py`
-- `docs/MC3_STARTER_KIT_LESSONS.md`
-- `docs/SUBMISSION_READINESS.md`
-- `docs/LABLAB_SUBMISSION.md`
-
-These prepare the final container workflow without guessing Match 4-specific CLI or JSON fields.
+Match 2 and Match 3 remain independently verified artifacts. Match 4 remains **ACTIVE DEVELOPMENT** until the final public container and official grader evidence are complete.
