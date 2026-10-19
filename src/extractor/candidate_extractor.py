@@ -62,7 +62,16 @@ class CandidateExtractor:
             r"(?<!\w)(?:\+?\d[\d().\-\s]{7,}\d)(?!\w)",
         ],
         "technical_spec": [
-            r"\b\d+(?:\.\d+)?\s?(?:GB|GiB|MB|MHz|GHz|W|kW|TFLOPS?|TOPS?|Gbps|Mbps)\b",
+            r"\b\d+(?:\.\d+)?\s?(?:TB|TiB|GB|GiB|MB|MiB|KB|KiB|Hz|kHz|MHz|GHz|mW|W|kW|mV|V|mA|A|TFLOPS?|TOPS?|Gbps|Mbps|MB/s|GB/s|nm|mm|cm|kg|lbs?|ms|us|µs|ns)\b",
+            r"\b\d+(?:\.\d+)?\s?°\s?[CF]\b",
+            r"\b\d+(?:\.\d+)?\s?(?:degrees?\s+)?(?:Celsius|Fahrenheit)\b",
+            r"\b\d+(?:\.\d+)?\s*[x×]\s*\d+(?:\.\d+)?(?:\s*[x×]\s*\d+(?:\.\d+)?)?\s*(?:mm|cm|m|in|inches)?\b",
+        ],
+        "duration": [
+            r"\b\d+(?:\.\d+)?(?:\s*[-–]\s*\d+(?:\.\d+)?)?\s*(?:business\s+)?(?:seconds?|secs?|minutes?|mins?|hours?|days?|weeks?|months?|years?)\b",
+        ],
+        "percentage": [
+            r"\b\d+(?:\.\d+)?\s*%",
         ],
         "number": [
             r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?![\w.])",
@@ -217,8 +226,17 @@ class CandidateExtractor:
             "number": ("count", "total", "number", "quantity"),
             "person": ("author", "founder", "creator", "ceo", "name"),
             "technical_spec": (
-                "memory", "ram", "capacity", "speed", "power",
+                "memory", "ram", "capacity", "speed", "power", "voltage",
+                "current", "temperature", "weight", "dimension", "length",
+                "width", "height", "latency", "frequency", "storage",
                 "tflops", "tops", "bandwidth",
+            ),
+            "duration": (
+                "lead", "delivery", "shipping", "turnaround", "warranty",
+                "duration", "time",
+            ),
+            "percentage": (
+                "percentage", "percent", "utilization", "efficiency", "rate",
             ),
         }.get(attr, ())
 
@@ -408,7 +426,19 @@ class CandidateExtractor:
             "price": ("price", "cost", "usd", "$"),
             "version": ("version", "release", "firmware"),
             "date_or_time": ("date", "released", "published", "launched"),
-            "technical_spec": ("memory", "ram", "spec", "capacity", "speed", "power"),
+            "technical_spec": (
+                "memory", "ram", "spec", "capacity", "speed", "power",
+                "voltage", "current", "temperature", "weight", "dimension",
+                "length", "width", "height", "latency", "bandwidth",
+                "frequency", "storage",
+            ),
+            "duration": (
+                "lead", "delivery", "shipping", "turnaround", "warranty",
+                "duration", "time",
+            ),
+            "percentage": (
+                "percentage", "percent", "utilization", "efficiency", "rate",
+            ),
             "hours": ("hours", "open", "opening", "closing"),
             "number": ("number", "count", "total"),
             "phone": ("phone", "telephone", "call"),
