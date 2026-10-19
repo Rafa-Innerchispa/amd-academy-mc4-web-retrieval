@@ -30,6 +30,18 @@ class CandidateExtractor:
         r"September|October|November|December)"
     )
 
+    INJECTION_MARKERS = (
+        "ignore previous instructions",
+        "ignore all previous instructions",
+        "system message",
+        "assistant instruction",
+        "developer instruction",
+        "follow these instructions",
+        "disregard previous",
+        "override the user",
+        "do not trust the user",
+    )
+
     PATTERNS = {
         "date_or_time": [
             rf"\b{MONTH}\s+\d{{1,2}}(?:st|nd|rd|th)?[,]?\s+\d{{4}}\b",
@@ -93,6 +105,8 @@ class CandidateExtractor:
             for match in re.finditer(pattern, text, flags=re.IGNORECASE):
                 value = self._normalize_value(match.group(0).strip(), attr)
                 context = self._context(text, match.start(), match.end())
+                if self._looks_like_untrusted_instruction(context):
+                    continue
                 found.append(
                     Candidate(
                         value=value,
@@ -278,6 +292,10 @@ class CandidateExtractor:
         if not values and attr == "general_information" and fragment.strip():
             values.append(fragment.strip())
         return values
+
+    def _looks_like_untrusted_instruction(self, context: str) -> bool:
+        lower = context.lower()
+        return any(marker in lower for marker in self.INJECTION_MARKERS)
 
     def _score_context(self, context: str, intent) -> float:
         lower = context.lower()
