@@ -65,6 +65,8 @@ class WebRetrievalAgent:
                 )
 
                 for candidate in ranked[: self.config.max_candidates_per_page]:
+                    if candidate.score < self.config.min_candidate_score:
+                        continue
                     status, provenance = self.verifier.verify(
                         candidate.value,
                         snapshot,
