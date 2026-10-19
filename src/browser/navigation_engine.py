@@ -18,12 +18,17 @@ class NavigationEngine:
         timeout: float = 15.0,
         user_agent: str = "AMDAILeague-MC4",
         max_redirects: int = 5,
+        allow_private_network_targets: bool = False,
+        allowed_private_hosts=(),
     ):
         self.timeout = timeout
         self.user_agent = user_agent
         self.max_redirects = max_redirects
         self.extractor = DOMExtractor()
-        self.url_policy = URLPolicy()
+        self.url_policy = URLPolicy(
+            allow_private_network_targets=allow_private_network_targets,
+            allowed_private_hosts=allowed_private_hosts,
+        )
         self._mock_responses: Dict[str, str] = {}
 
     def register_mock(self, url: str, html_body: str):
