@@ -65,3 +65,37 @@ Until AMD/LabLab publishes the Match 4 starter kit, we do not freeze:
 - exact VRAM/image-size limits for Match 4
 
 The official kit wins over every assumption in this document.
+
+
+## Repository-level corroboration reviewed on 2026-10-19
+
+The public repository `ctmakc/pinpoint-web-agent` adds stronger implementation evidence than the LabLab description alone:
+
+- example invocation uses `python3 /app/app.py --query-id ... --url ... --query ...`
+- writes `/app/output/<query-id>_output.json`
+- accepts `--input`, `--output-dir`, and a compatibility `--index`
+- uses the same ROCm 10 / PyTorch 2.13 / Python 3.14 base image already used by the programme baseline
+- reports a resident model-server pattern and a 24-second internal request budget
+- reports that the AMD notebook pool can restrict outbound sites, which makes seed-URL navigation important
+
+This still does **not** make those details official. It does, however, increase confidence that our provisional adapter is pointed at the right interface family.
+
+The public repository `dcain2336/amd-league-match4-webretriever` independently reinforces:
+
+- deterministic intent parsing
+- bounded multi-hop navigation
+- JSON-LD and table extraction
+- mandatory source grounding
+- fail-closed behavior
+
+## New implementation deltas informed by this review
+
+The active branch now also includes:
+
+- generic JSON/API response extraction, not only HTML and JSON-LD
+- lexical-term relevance scoring instead of arbitrary substring matches
+- redirect-domain lock tied to the original seed host
+- bounded best-first navigation with backtracking after dead ends
+- benchmark coverage for JSON APIs, prompt-injection decoys, and backtracking
+
+These changes are engineering improvements, not claims about hidden grader behavior.
