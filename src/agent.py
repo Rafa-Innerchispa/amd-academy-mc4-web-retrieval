@@ -9,6 +9,7 @@ from .models.schema import RetrievalRequest, RetrievalResponse, VerificationStat
 from .parser.intent_parser import IntentParser
 from .planner.navigation_planner import NavigationPlanner
 from .provenance.tracker import ProvenanceTracker
+from .search.search_engine import SearchEngine
 from .verifier.fail_closed_verifier import FailClosedVerifier
 
 
@@ -35,18 +36,37 @@ class WebRetrievalAgent:
             min_confidence=self.config.verification_threshold
         )
         self.provenance_tracker = ProvenanceTracker()
+        self.search = SearchEngine(
+            endpoint=self.config.search_endpoint,
+            timeout_seconds=self.config.search_timeout_seconds,
+            max_results=self.config.search_max_results,
+        )
 
     def execute(self, request: RetrievalRequest) -> RetrievalResponse:
         started = time.monotonic()
         intent = self.parser.parse(request.query, explicit_seed_url=request.seed_url)
 
+        search_used = False
         if not intent.inferred_seed_url:
-            return RetrievalResponse(
-                status="FAIL_CLOSED",
-                query=request.query,
-                verification_status=VerificationStatus.EVIDENCE_MISSING,
-                failure_reason="NO_SEED_URL",
-            )
+            if not self.config.enable_public_search:
+                return RetrievalResponse(
+                    status="FAIL_CLOSED",
+                    query=request.query,
+                    verification_status=VerificationStatus.EVIDENCE_MISSING,
+                    failure_reason="NO_SEED_URL",
+                )
+
+            search_results = self.search.search(request.query)
+            if not search_results:
+                return RetrievalResponse(
+                    status="FAIL_CLOSED",
+                    query=request.query,
+                    verification_status=VerificationStatus.EVIDENCE_MISSING,
+                    failure_reason="SEARCH_NO_RESULTS",
+                )
+
+            intent.inferred_seed_url = search_results[0].url
+            search_used = True
 
         planner = NavigationPlanner(
             max_hops=request.max_hops or self.config.max_navigation_hops,
@@ -98,6 +118,7 @@ class WebRetrievalAgent:
                                 "candidate_source_kind": candidate.source_kind,
                                 "candidate_score": round(candidate.score, 3),
                                 "elapsed_seconds": round(time.monotonic() - started, 3),
+                                "search_used": search_used,
                             },
                         )
 
@@ -118,5 +139,6 @@ class WebRetrievalAgent:
             failure_reason="CLAIM_NOT_FOUND_OR_UNVERIFIED_IN_EVIDENCE",
             metadata={
                 "elapsed_seconds": round(time.monotonic() - started, 3),
+                "search_used": search_used,
             },
         )
