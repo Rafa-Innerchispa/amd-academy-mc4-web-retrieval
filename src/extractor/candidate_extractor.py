@@ -186,7 +186,7 @@ class CandidateExtractor:
         )
         out: List[Candidate] = []
         for match in pattern.finditer(text):
-            value = match.group(1).strip()
+            value = self._normalize_value(match.group(1).strip(), "person")
             context = self._context(text, match.start(), match.end())
             out.append(
                 Candidate(
@@ -304,6 +304,6 @@ class CandidateExtractor:
                 best_by_value[key] = item
         return sorted(
             best_by_value.values(),
-            key=lambda item: (item.score, len(item.context), -len(item.value)),
+            key=lambda item: (item.score, len(item.context)),
             reverse=True,
         )
