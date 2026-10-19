@@ -231,6 +231,42 @@ CASES: List[Case] = [
         expected_source="https://bench.test/injection",
     ),
     Case(
+        name="lead_time_duration",
+        query="What is the lead time for Widget Pro?",
+        seed_url="https://bench.test/lead-time",
+        pages={
+            "https://bench.test/lead-time": """
+                <html><body><p>Widget Pro standard lead time is 3-5 business days.</p></body></html>
+            """,
+        },
+        expected_answer="3-5 business days",
+        expected_source="https://bench.test/lead-time",
+    ),
+    Case(
+        name="temperature_spec",
+        query="What is the maximum temperature for Module X?",
+        seed_url="https://bench.test/module-x",
+        pages={
+            "https://bench.test/module-x": """
+                <html><body><p>Module X maximum operating temperature is 95 °C.</p></body></html>
+            """,
+        },
+        expected_answer="95 °C",
+        expected_source="https://bench.test/module-x",
+    ),
+    Case(
+        name="efficiency_percentage",
+        query="What is the efficiency percentage of Unit A?",
+        seed_url="https://bench.test/unit-a",
+        pages={
+            "https://bench.test/unit-a": """
+                <html><body><p>Unit A conversion efficiency is 99.9%.</p></body></html>
+            """,
+        },
+        expected_answer="99.9%",
+        expected_source="https://bench.test/unit-a",
+    ),
+    Case(
         name="fail_closed_missing",
         query="What is the price of the R9700 workstation?",
         seed_url="https://bench.test/missing",
