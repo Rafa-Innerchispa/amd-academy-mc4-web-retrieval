@@ -1,17 +1,30 @@
 {
   "date": "2026-10-19",
   "branch": "chatgpt/mc4-core-20261019",
+  "head_sha": "deb543eafbc91b687cf0e97387ebd7f21364fa6b",
+  "workflow": {
+    "name": "Match 4 Python validation",
+    "run_id": 39313872122,
+    "conclusion": "success"
+  },
   "environment": {
-    "kind": "ChatGPT working container (development validation only)",
-    "python": "3.13.5",
-    "pytest": "9.0.2",
+    "runner": "GitHub Actions ubuntu-latest",
+    "python": "3.13.16",
     "amd_gpu": false
   },
-  "command": "python3 -m pytest -q",
-  "result": {
-    "passed": 34,
+  "compileall": "PASS",
+  "pytest": {
+    "passed": 37,
     "failed": 0,
-    "duration_seconds": 0.13
+    "duration_seconds": 0.58
   },
-  "caveat": "This is a local functional test run, not AMD hardware or official Match 4 grader validation."
+  "offline_benchmark": {
+    "cases": 9,
+    "passed": 9,
+    "failed": 0,
+    "exact_case_accuracy": 1,
+    "latency_ms_p50": 1.364,
+    "latency_ms_p95": 36.989
+  },
+  "caveat": "CI functional validation only. Not AMD GPU performance and not an official AMD/LabLab Match 4 grader score."
 }
