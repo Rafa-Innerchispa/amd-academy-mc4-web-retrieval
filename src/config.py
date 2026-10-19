@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 class AgentConfig(BaseModel):
     max_navigation_hops: int = Field(default=5, description="Maximum navigation steps before terminating")
     request_timeout_seconds: float = Field(default=15.0, description="HTTP request timeout per step")
+    total_budget_seconds: float = Field(default=24.0, description="Engineering wall-clock budget for one retrieval; adapter may override when official limits are known")
     max_dom_char_length: int = Field(default=100000, description="Truncation limit for DOM extraction")
     verification_threshold: float = Field(default=0.85, description="Minimum confidence for fuzzy grounding")
     max_candidates_per_page: int = Field(default=8, description="Maximum ranked candidates verified per page")
