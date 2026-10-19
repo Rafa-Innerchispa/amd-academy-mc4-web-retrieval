@@ -200,8 +200,8 @@ CASES: List[Case] = [
         pages={
             "https://bench.test/catalog": """
                 <html><body>
-                  <a href="/news">Widget Pro price announcement</a>
-                  <a href="/product">Widget Pro product price</a>
+                  <a href="/news">Widget Pro price current official announcement</a>
+                  <a href="/product">Widget Pro details</a>
                 </body></html>
             """,
             "https://bench.test/news": """
