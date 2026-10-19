@@ -104,3 +104,29 @@ def test_keyword_pro_does_not_match_product_substring():
     basic = extractor._score_context("product: Widget Basic | price: 99.00", intent)
     pro = extractor._score_context("product: Widget Pro | price: 349.00", intent)
     assert pro > basic
+
+
+def test_same_product_current_price_beats_archived_price():
+    html = """
+    <html><body>
+      <p>Widget Pro previous archived price: $299.00 USD.</p>
+      <p>Widget Pro current price: $349.00 USD.</p>
+    </body></html>
+    """
+    intent = IntentParser().parse("What is the current price of Widget Pro?")
+    best = CandidateExtractor().best(html, "", intent)
+    assert best is not None
+    assert best.value == "$349.00"
+
+
+def test_same_product_previous_price_can_be_requested_explicitly():
+    html = """
+    <html><body>
+      <p>Widget Pro previous price: $299.00 USD.</p>
+      <p>Widget Pro current price: $349.00 USD.</p>
+    </body></html>
+    """
+    intent = IntentParser().parse("What was the previous price of Widget Pro?")
+    best = CandidateExtractor().best(html, "", intent)
+    assert best is not None
+    assert best.value == "$299.00"
