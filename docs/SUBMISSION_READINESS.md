@@ -46,6 +46,7 @@ https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval/pull/2
 - [x] wall-clock retrieval budget
 - [x] atomic output writer
 - [x] provisional `/app/app.py` compatibility adapter
+- [x] common grader CLI aliases (`-q`, `--input-file`, `--tasks`) covered by tests
 - [x] isolated demo UI
 - [x] provisional programme-level Docker baseline
 - [x] programme-level Docker selfcheck
@@ -66,17 +67,17 @@ PYTHONPATH=. python3 tools/benchmark_core.py
 Results:
 
 - **compileall: PASS**
-- **63 tests passed**
+- **65 tests passed**
 - offline benchmark: **all current cases PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39324279750)
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39342544907)
 - cross-domain redirect regression: **PASS**
 - structured prompt-injection regressions: **PASS**
 - JSON/API extraction regressions: **PASS**
 - decoy-link backtracking E2E: **PASS**
 
 - exact-case accuracy: **1.0**
-- CI mocked latency p50: **2.167 ms**
-- CI mocked latency p95: **3.837 ms**
+- CI mocked latency p50: **2.109 ms**
+- CI mocked latency p95: **3.742 ms**
 
 Evidence:
 
