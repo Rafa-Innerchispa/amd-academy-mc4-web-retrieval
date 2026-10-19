@@ -28,7 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
         add_help=True,
     )
     parser.add_argument("positional_query", nargs="?")
-    parser.add_argument("--query")
+    parser.add_argument("--query", "-q")
     parser.add_argument("--question")
     parser.add_argument("--task")
     parser.add_argument("--prompt")
@@ -42,7 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir")
     parser.add_argument("--max-hops", type=int, default=5)
     parser.add_argument("--allow-private-host", action="append", default=[])
-    parser.add_argument("--input")
+    parser.add_argument("--input", "--input-file", "--tasks", dest="input")
     parser.add_argument("--warmup", action="store_true")
     parser.add_argument("--index", nargs="?")
     parser.add_argument("--corpus", nargs="?")
