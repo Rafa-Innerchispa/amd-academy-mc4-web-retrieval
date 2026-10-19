@@ -75,7 +75,7 @@ Digest:
 
 Local functional evidence:
 
-- **34 tests passed**
+- **37 tests passed**
 - Python compileall: **PASS**
 - offline benchmark: **9/9 PASS**
 - exact-case accuracy: **1.0**
@@ -89,7 +89,7 @@ Local functional evidence:
 - explicit internal grader-host allowlisting: PASS
 - atomic output: PASS
 
-These are development-container results only. Final AMD GPU, Docker size, VRAM, runtime timing, official sample/selfcheck, public pull and immutable digest remain pending.
+These are CI functional results only. Final AMD GPU, Docker size, VRAM, runtime timing, official sample/selfcheck, public pull and immutable digest remain pending.
 
 ## Submission truth boundary
 
