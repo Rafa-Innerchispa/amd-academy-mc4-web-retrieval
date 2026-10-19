@@ -45,6 +45,7 @@ class WebRetrievalAgent:
 
     def execute(self, request: RetrievalRequest) -> RetrievalResponse:
         started = time.monotonic()
+        deadline = started + self.config.total_budget_seconds
         intent = self.parser.parse(request.query, explicit_seed_url=request.seed_url)
 
         search_used = False
@@ -96,7 +97,20 @@ class WebRetrievalAgent:
             snapshot = self.browser.fetch(
                 current_step.target_url,
                 allowed_host=None if self.config.allow_external_domains else seed_host,
+                deadline_monotonic=deadline,
             )
+
+            if snapshot.status_code == 504 or time.monotonic() >= deadline:
+                return RetrievalResponse(
+                    status="FAIL_CLOSED",
+                    query=request.query,
+                    verification_status=VerificationStatus.REJECTED_UNVERIFIED,
+                    navigation_trail=all_steps,
+                    failure_reason="TIME_BUDGET_EXCEEDED",
+                    metadata={
+                        "elapsed_seconds": round(time.monotonic() - started, 3),
+                    },
+                )
 
             if snapshot.status_code == 200:
                 ranked = self.candidates.extract(
