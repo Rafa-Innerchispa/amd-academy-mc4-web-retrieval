@@ -84,7 +84,7 @@ class WebRetrievalAgent:
                             },
                         )
 
-            available_links = self.extractor.extract_links(snapshot.raw_html)
+            available_links = self.extractor.extract_link_candidates(snapshot.raw_html)
             current_step = planner.select_next_step(
                 snapshot.url,
                 available_links,
