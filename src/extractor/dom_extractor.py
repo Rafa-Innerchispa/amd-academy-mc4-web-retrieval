@@ -169,3 +169,32 @@ class DOMExtractor:
             # The standard-library fallback cannot reliably preserve anchor text
             # with the current parser, so retain URL-only compatibility.
             return [(href, "") for href in self.extract_links(html_content)]
+
+
+    def extract_contact_values(self, html_content: str):
+        """Extract literal contact values from mailto:/tel: anchors."""
+        emails = []
+        phones = []
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html_content, "html.parser")
+            for anchor in soup.find_all("a", href=True):
+                href = anchor["href"].strip()
+                lower = href.lower()
+                if lower.startswith("mailto:"):
+                    value = href.split(":", 1)[1].split("?", 1)[0].strip()
+                    if value:
+                        emails.append(value)
+                elif lower.startswith("tel:"):
+                    value = href.split(":", 1)[1].split("?", 1)[0].strip()
+                    if value:
+                        phones.append(value)
+        except ImportError:
+            for match in re.finditer(r'href=["\\\']mailto:([^"\\\'?]+)', html_content, flags=re.IGNORECASE):
+                emails.append(match.group(1).strip())
+            for match in re.finditer(r'href=["\\\']tel:([^"\\\'?]+)', html_content, flags=re.IGNORECASE):
+                phones.append(match.group(1).strip())
+        return {
+            "email": list(dict.fromkeys(emails)),
+            "phone": list(dict.fromkeys(phones)),
+        }
