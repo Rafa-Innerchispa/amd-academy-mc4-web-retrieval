@@ -75,7 +75,7 @@ Digest:
 
 Local functional evidence:
 
-- **37 tests passed**
+- **40 tests passed**
 - Python compileall: **PASS**
 - offline benchmark: **9/9 PASS**
 - exact-case accuracy: **1.0**
