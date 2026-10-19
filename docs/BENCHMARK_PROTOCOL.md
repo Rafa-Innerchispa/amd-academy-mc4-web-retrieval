@@ -5,7 +5,7 @@ The official Match 4 starter kit is not yet publicly recoverable, so this reposi
 Run:
 
 ```bash
-python3 tools/benchmark_core.py
+PYTHONPATH=. python3 tools/benchmark_core.py
 ```
 
 Current case families:
@@ -20,19 +20,11 @@ Current case families:
 - contact email
 - fail-closed missing answer
 
-The harness records:
-
-- exact case accuracy
-- source/provenance correctness
-- navigation steps
-- per-case latency
-- p50 latency
-- p95 latency
-- refusal correctness
+The harness records exact case accuracy, source/provenance correctness, navigation steps, per-case latency, p50/p95 latency and refusal correctness.
 
 ## Why this exists
 
-Public Match 4 submissions already suggest that the evaluation rewards exact-value retrieval, evidence URLs, bounded navigation and low latency, but those public submissions are **not** the official contract.
+Public Match 4 submissions suggest exact-value retrieval, evidence URLs, bounded navigation and low latency are useful design targets, but public submissions are **not** the official contract.
 
 This benchmark therefore targets robust general behavior while remaining replaceable by the official sample/selfcheck when AMD/LabLab releases it.
 
@@ -46,6 +38,17 @@ A case passes only when all applicable conditions match:
 
 No partial credit is assigned by this harness.
 
-## Evidence status
+## Current evidence
 
-Do not publish benchmark scores in LabLab or the umbrella repository until the harness has been executed on the current branch and its JSON output has been retained under `evidence/`.
+The benchmark has now been executed on the current development implementation and retained at:
+
+`evidence/offline_benchmark_20261019.json`
+
+Result:
+
+- **9/9 cases PASS**
+- exact-case accuracy: **1.0**
+- mocked p50: **0.592 ms**
+- mocked p95: **86.704 ms**
+
+These timings come from mocked local pages in a development container. They are useful regression evidence, not AMD hardware performance and not an official competition score.
