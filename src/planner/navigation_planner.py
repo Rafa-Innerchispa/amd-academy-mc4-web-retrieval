@@ -60,6 +60,15 @@ class NavigationPlanner:
                     score += 1
                 if kw in haystack_anchor:
                     score += 2
+
+            # Low-priority pagination heuristic. It never outranks a strongly
+            # relevant semantic link, but it lets the agent continue through
+            # result/product lists when the requested value lives on page 2+.
+            pagination_terms = ("next", "next page", "more results", "more", "older")
+            if any(term == haystack_anchor.strip() for term in pagination_terms):
+                score += 0.75
+            if "page=" in haystack_url or "/page/" in haystack_url:
+                score += 0.5
             
             scored_links.append((score, resolved_link))
 
