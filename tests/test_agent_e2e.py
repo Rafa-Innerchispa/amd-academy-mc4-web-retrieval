@@ -131,3 +131,42 @@ def test_agent_follows_pagination_to_requested_value():
     assert response.provenance is not None
     assert response.provenance.source_url == "https://shop.test/catalog?page=2"
     assert len(response.navigation_trail) == 2
+
+
+def test_agent_backtracks_from_relevant_decoy_to_second_candidate():
+    agent = WebRetrievalAgent()
+    agent.browser.register_mock(
+        "https://shop.test/start",
+        """
+        <html><body>
+          <a href="/news">Widget Pro price announcement</a>
+          <a href="/product">Widget Pro product price</a>
+        </body></html>
+        """,
+    )
+    agent.browser.register_mock(
+        "https://shop.test/news",
+        "<html><body><p>Announcement only. No price listed.</p></body></html>",
+    )
+    agent.browser.register_mock(
+        "https://shop.test/product",
+        "<html><body><p>Widget Pro current price: $349.00 USD.</p></body></html>",
+    )
+
+    response = agent.execute(
+        RetrievalRequest(
+            query="What is the price of Widget Pro?",
+            seed_url="https://shop.test/start",
+            max_hops=4,
+        )
+    )
+
+    assert response.status == "SUCCESS"
+    assert response.answer == "$349.00"
+    assert response.provenance is not None
+    assert response.provenance.source_url == "https://shop.test/product"
+    assert [step.target_url for step in response.navigation_trail] == [
+        "https://shop.test/start",
+        "https://shop.test/news",
+        "https://shop.test/product",
+    ]
