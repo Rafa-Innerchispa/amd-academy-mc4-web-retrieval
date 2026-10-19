@@ -64,11 +64,11 @@ PYTHONPATH=. python3 tools/benchmark_core.py
 Results:
 
 - **compileall: PASS**
-- **34 tests passed**
+- **37 tests passed**
 - offline benchmark: **9/9 PASS**
 - exact-case accuracy: **1.0**
-- mocked latency p50: **0.592 ms**
-- mocked latency p95: **86.704 ms**
+- CI mocked latency p50: **1.364 ms**
+- CI mocked latency p95: **36.989 ms**
 
 Evidence:
 
