@@ -1,5 +1,5 @@
 from typing import List, Set, Optional, Tuple
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urldefrag, urlparse, urljoin
 
 from ..models.schema import NavigationStep, ParsedIntent
 
@@ -29,6 +29,7 @@ class NavigationPlanner:
         self._sequence = 0
 
     def get_initial_step(self, seed_url: str) -> NavigationStep:
+        seed_url = self._canonical_url(seed_url)
         parsed_seed = urlparse(seed_url)
         self.seed_domain = (parsed_seed.hostname or "").rstrip(".").lower()
         step = NavigationStep(
@@ -64,7 +65,7 @@ class NavigationPlanner:
                 href = raw_link
                 anchor_text = ""
 
-            resolved_link = urljoin(current_url, href)
+            resolved_link = self._canonical_url(urljoin(current_url, href))
             parsed_resolved = urlparse(resolved_link)
 
             resolved_domain = (parsed_resolved.hostname or "").rstrip(".").lower()
@@ -113,6 +114,12 @@ class NavigationPlanner:
             self.navigation_trail.append(next_step)
             return next_step
         return None
+
+    def _canonical_url(self, url: str) -> str:
+        # URL fragments are client-side coordinates and are never sent in the
+        # HTTP request. Treat them as one resource so #tabs cannot consume the
+        # bounded hop budget repeatedly.
+        return urldefrag(url)[0]
 
     def _score_link(self, resolved_link: str, anchor_text: str, intent: ParsedIntent) -> float:
         score = 0.0
