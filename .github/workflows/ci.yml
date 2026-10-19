@@ -33,7 +33,23 @@ jobs:
         run: python -m compileall -q src app tools
 
       - name: Unit tests
-        run: python -m pytest -q
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -vv 2>&1 | tee pytest-output.txt
 
       - name: Offline benchmark
-        run: PYTHONPATH=. python tools/benchmark_core.py
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=. python tools/benchmark_core.py 2>&1 | tee benchmark-output.txt
+
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: match4-validation-logs
+          path: |
+            pytest-output.txt
+            benchmark-output.txt
+          if-no-files-found: ignore
