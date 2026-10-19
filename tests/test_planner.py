@@ -47,3 +47,19 @@ def test_planner_uses_anchor_text_when_url_is_opaque():
     step = planner.select_next_step("https://example.com/start", links, intent)
     assert step is not None
     assert step.target_url == "https://example.com/p/999"
+
+
+def test_planner_normalizes_same_hostname_case_trailing_dot_and_port():
+    planner = NavigationPlanner(max_hops=3, lock_domain=True)
+    intent = IntentParser().parse(
+        "Find product specifications",
+        explicit_seed_url="https://Example.COM/start",
+    )
+    planner.get_initial_step("https://Example.COM/start")
+    links = [
+        ("https://example.com.:443/specs", "Product specifications"),
+        ("https://evil.example.net/specs", "Product specifications"),
+    ]
+    step = planner.select_next_step("https://Example.COM/start", links, intent)
+    assert step is not None
+    assert step.target_url == "https://example.com.:443/specs"
