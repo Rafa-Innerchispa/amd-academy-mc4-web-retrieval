@@ -78,6 +78,10 @@ class CandidateExtractor:
 
     def extract(self, html: str, cleaned_text: str, intent) -> List[Candidate]:
         candidates: List[Candidate] = []
+        json_document_candidates = self._from_json_document(html, intent)
+        if json_document_candidates:
+            candidates.extend(json_document_candidates)
+
         block_candidates = self._from_html_blocks(html, intent)
         if block_candidates:
             candidates.extend(block_candidates)
@@ -186,6 +190,85 @@ class CandidateExtractor:
                 )
             )
         return out
+
+    def _from_json_document(self, raw: str, intent) -> List[Candidate]:
+        """Extract grounded values from a response whose body is JSON.
+
+        Match 4 may encounter API endpoints rather than rendered HTML. Keep
+        sibling scalar fields together so entity names, units and values can
+        contribute to relevance scoring without requiring an LLM.
+        """
+        stripped = raw.strip()
+        if not stripped or stripped[0] not in "[{":
+            return []
+        try:
+            parsed = json.loads(stripped)
+        except Exception:
+            return []
+
+        attr = self._effective_attribute(intent)
+        path_terms = {
+            "price": ("price", "cost", "amount", "fee"),
+            "date_or_time": ("date", "release", "released", "published", "created", "updated"),
+            "version": ("version", "release", "revision"),
+            "email": ("email", "mail"),
+            "phone": ("phone", "telephone", "tel"),
+            "hours": ("hours", "opening", "closing", "schedule"),
+            "number": ("count", "total", "number", "quantity"),
+            "person": ("author", "founder", "creator", "ceo", "name"),
+            "technical_spec": (
+                "memory", "ram", "capacity", "speed", "power",
+                "tflops", "tops", "bandwidth",
+            ),
+        }.get(attr, ())
+
+        out: List[Candidate] = []
+        for path, value, record_context in self._walk_json_records(parsed):
+            fragment = str(value)
+            path_text = " ".join(path)
+            context = f"{path_text}: {fragment} | {record_context}".strip(" |")
+            if self._looks_like_untrusted_instruction(context):
+                continue
+
+            values = self._extract_values_from_fragment(fragment, intent)
+            path_lower = path_text.lower()
+            if not values and path_terms and any(term in path_lower for term in path_terms):
+                normalized = self._normalize_value(fragment, attr)
+                if normalized:
+                    values = [normalized]
+
+            score = self._score_context(context, intent) + 2.25
+            for candidate in values:
+                out.append(
+                    Candidate(
+                        value=candidate,
+                        context=context,
+                        score=score,
+                        source_kind="json_document",
+                    )
+                )
+        return out
+
+    def _walk_json_records(
+        self, value, path: Tuple[str, ...] = ()
+    ) -> Iterable[Tuple[Tuple[str, ...], object, str]]:
+        if isinstance(value, dict):
+            scalar_items = [
+                (str(key), child)
+                for key, child in value.items()
+                if isinstance(child, (str, int, float, bool)) and child is not None
+            ]
+            record_context = " | ".join(
+                f"{key}: {child}" for key, child in scalar_items
+            )
+            for key, child in scalar_items:
+                yield path + (key,), child, record_context
+            for key, child in value.items():
+                if isinstance(child, (dict, list)):
+                    yield from self._walk_json_records(child, path + (str(key),))
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                yield from self._walk_json_records(child, path + (str(index),))
 
     def _from_json_ld(self, html: str, intent) -> List[Candidate]:
         out: List[Candidate] = []
