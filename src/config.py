@@ -20,6 +20,24 @@ class AgentConfig(BaseModel):
         default=False,
         description="Allow navigation outside the seed domain. Disabled by default.",
     )
+    enable_public_search: bool = Field(
+        default=False,
+        description="Enable keyless public-web discovery when no starting URL is supplied.",
+    )
+    search_endpoint: str = Field(
+        default="https://html.duckduckgo.com/html/",
+        description="Search endpoint used only when public search is explicitly enabled.",
+    )
+    search_timeout_seconds: float = Field(
+        default=8.0,
+        description="Timeout for optional public search discovery.",
+    )
+    search_max_results: int = Field(
+        default=5,
+        ge=1,
+        le=10,
+        description="Maximum discovery results considered before retrieval.",
+    )
     allow_private_network_targets: bool = Field(
         default=False,
         description="Permit private/internal network targets. Keep false for normal web use.",
