@@ -1,0 +1,58 @@
+from src.extractor.candidate_extractor import CandidateExtractor
+from src.parser.intent_parser import IntentParser
+
+
+def test_price_candidate_prefers_context_matching_product():
+    html = """
+    <html><body>
+      <p>Accessory cable price: $19.99</p>
+      <p>R9700 workstation launch price is $1299.00 USD.</p>
+    </body></html>
+    """
+    parser = IntentParser()
+    intent = parser.parse(
+        "What is the price of the R9700 workstation?",
+        explicit_seed_url="https://example.com/products",
+    )
+    text = "Accessory cable price: $19.99 R9700 workstation launch price is $1299.00 USD."
+    best = CandidateExtractor().best(html, text, intent)
+
+    assert best is not None
+    assert "$1299.00" in best.value
+    assert "R9700" in best.context
+
+
+def test_json_ld_price_is_extracted_and_ranked():
+    html = """
+    <html><head>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Widget Pro",
+      "offers": {"@type": "Offer", "price": "$349.00", "priceCurrency": "USD"}
+    }
+    </script>
+    </head><body><h1>Widget Pro</h1></body></html>
+    """
+    intent = IntentParser().parse(
+        "What is the price of Widget Pro?",
+        explicit_seed_url="https://example.com/widget",
+    )
+    ranked = CandidateExtractor().extract(html, "Widget Pro", intent)
+
+    assert ranked
+    assert ranked[0].value == "$349.00"
+    assert ranked[0].source_kind == "json_ld"
+
+
+def test_version_candidate_uses_relevant_context():
+    text = "Legacy driver version 5.7. Current ROCm release version 10.1.0 is recommended."
+    intent = IntentParser().parse(
+        "What is the current ROCm version?",
+        explicit_seed_url="https://example.com/releases",
+    )
+    best = CandidateExtractor().best("<html></html>", text, intent)
+
+    assert best is not None
+    assert "10.1.0" in best.value
