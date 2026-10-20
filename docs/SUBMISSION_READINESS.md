@@ -45,6 +45,7 @@ https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval/pull/2
 - [x] explicit internal-grader-host allowlist support
 - [x] wall-clock retrieval budget
 - [x] atomic output writer
+- [x] path-traversal-safe grader output IDs
 - [x] provisional `/app/app.py` compatibility adapter
 - [x] common grader CLI aliases (`-q`, `--input-file`, `--tasks`) covered by tests
 - [x] isolated demo UI
