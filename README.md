@@ -30,6 +30,7 @@ Implemented on the development branch:
 - explicit allowlist for grader-provided internal hosts
 - bounded wall-clock retrieval budget
 - atomic JSON output helpers
+- path-traversal-safe, bounded grader output IDs
 - provisional `/app/app.py` grader adapter
 - common grader CLI aliases (`-q`, `--input-file`, `--tasks`) for compatibility without changing fail-closed semantics
 - isolated product/demo UI under `demo/`
