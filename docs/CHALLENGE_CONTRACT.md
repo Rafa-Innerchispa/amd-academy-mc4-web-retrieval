@@ -92,6 +92,18 @@ Public Match 4 submissions visible on LabLab already describe Dockerized retriev
 
 Those submissions are useful evidence that the implementation direction is reasonable, but they are **not authoritative challenge specifications** and are not used here to invent grader rules.
 
+## Third-party contract corroboration — not authoritative
+
+A fresh public submission review on 2026-10-19 found an independent Match 4 team describing its tested League container contract as:
+
+- entrypoint: `python3 /app/app.py`
+- one JSON output file per question under `/app/output`
+- ROCm 10 / PyTorch 2.13 / Python 3.14 base/runtime family
+- per-request engineering budget around 24 seconds
+- exact value + source URL, empty answer when evidence is missing
+
+This aligns closely with the current provisional adapter and programme-level baseline in this repository. It remains **third-party evidence only** until AMD/LabLab publishes or exposes the actual Match 4 technical brief. Do not convert these observations into hard official requirements without first-party confirmation.
+
 ## Submission gate
 
 Do **not** mark Match 4 READY until all of these exist:
