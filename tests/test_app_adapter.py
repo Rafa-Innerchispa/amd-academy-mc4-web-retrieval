@@ -68,3 +68,27 @@ def test_index_is_noop_only_when_no_query_is_present(tmp_path):
         "--output-dir", str(tmp_path),
     ]) == 0
     assert (tmp_path / "q-index-query_output.json").exists()
+
+
+def test_adapter_sanitizes_query_id_path_traversal(tmp_path):
+    assert main([
+        "--query-id", "../../escape",
+        "--query", "What is the price of Widget Pro?",
+        "--output-dir", str(tmp_path),
+    ]) == 0
+
+    assert (tmp_path / "escape_output.json").exists()
+    assert not (tmp_path.parent / "escape_output.json").exists()
+
+
+def test_adapter_bounds_long_query_id(tmp_path):
+    raw_id = "q" * 500
+    assert main([
+        "--query-id", raw_id,
+        "--query", "What is the price of Widget Pro?",
+        "--output-dir", str(tmp_path),
+    ]) == 0
+
+    outputs = list(tmp_path.glob("*_output.json"))
+    assert len(outputs) == 1
+    assert len(outputs[0].name) <= 132
