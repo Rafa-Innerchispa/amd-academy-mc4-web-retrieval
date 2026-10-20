@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -13,6 +14,15 @@ from src.models.schema import RetrievalRequest
 
 
 DEFAULT_OUTPUT_DIR = Path(os.getenv("AGENT_OUTPUT", "/app/output"))
+SAFE_QUERY_ID_RE = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def safe_query_id(value: str) -> str:
+    """Return a bounded filename-safe identifier for grader output."""
+    cleaned = SAFE_QUERY_ID_RE.sub("_", str(value or "").strip()).strip("._-")
+    if not cleaned:
+        return "query"
+    return cleaned[:120]
 
 
 def first_nonempty(values: Iterable[Optional[str]]) -> Optional[str]:
@@ -78,7 +88,7 @@ def execute_one(
     max_hops: int,
     allowed_private_hosts: list[str],
 ) -> dict:
-    output_path = output_dir / f"{query_id}_output.json"
+    output_path = output_dir / f"{safe_query_id(query_id)}_output.json"
     initialize_empty_output(output_path)
 
     config = AgentConfig(
