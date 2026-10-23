@@ -41,17 +41,19 @@ Implemented on the development branch:
 
 Development validation on the current implementation:
 
-- **70 tests passed**
+- **74 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
 - offline retrieval benchmark: **all current cases PASS**
-- competitive adversarial benchmark: **25/25 PASS (100% exact-case accuracy)**
+- competitive adversarial benchmark: **30/30 PASS (100% exact-case accuracy)**
 - lightweight container packaging smoke: **PASS** (GitHub Actions run 39342544907)
 
 - exact-case accuracy: **1.0**
 - core CI mocked benchmark p50: **2.119 ms**
 - core CI mocked benchmark p95: **3.780 ms**
-- competitive benchmark p50: **1.789 ms**
-- competitive benchmark p95: **3.524 ms**
+- competitive benchmark p50: **3.018 ms**
+- competitive benchmark p95: **6.429 ms**
+- ambiguity gate activated: **3/30 cases (10%)**
+- reranker invocations in baseline: **0**
 - adversarial coverage: JSON/API responses, structured prompt injection, cross-domain redirects, absolute deadline enforcement, fragment deduplication, decoy-link backtracking, and current-vs-stale conflicting values
 
 Evidence:
