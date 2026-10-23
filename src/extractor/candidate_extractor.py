@@ -309,7 +309,38 @@ class CandidateExtractor:
                 if self._looks_like_untrusted_instruction(context):
                     continue
                 score = self._score_context(context, intent) + 2.0
-                for candidate in self._extract_values_from_fragment(fragment, intent):
+                values = self._extract_values_from_fragment(fragment, intent)
+                if not values:
+                    attr = self._effective_attribute(intent)
+                    path_lower = path_text.lower()
+                    path_terms = {
+                        "price": ("price", "cost", "amount", "fee"),
+                        "date_or_time": ("date", "release", "released", "published", "created", "updated"),
+                        "version": ("version", "release", "revision"),
+                        "email": ("email", "mail"),
+                        "phone": ("phone", "telephone", "tel"),
+                        "hours": ("hours", "opening", "closing", "schedule"),
+                        "number": ("count", "total", "number", "quantity"),
+                        "person": ("author", "founder", "creator", "ceo", "name"),
+                        "technical_spec": (
+                            "memory", "ram", "capacity", "speed", "power", "voltage",
+                            "current", "temperature", "weight", "dimension", "length",
+                            "width", "height", "latency", "frequency", "storage",
+                            "tflops", "tops", "bandwidth",
+                        ),
+                        "duration": (
+                            "lead", "delivery", "shipping", "turnaround", "warranty",
+                            "duration", "time",
+                        ),
+                        "percentage": (
+                            "percentage", "percent", "utilization", "efficiency", "rate",
+                        ),
+                    }.get(attr, ())
+                    if path_terms and any(term in path_lower for term in path_terms):
+                        normalized = self._normalize_value(fragment, attr)
+                        if normalized:
+                            values = [normalized]
+                for candidate in values:
                     out.append(
                         Candidate(
                             value=candidate,
