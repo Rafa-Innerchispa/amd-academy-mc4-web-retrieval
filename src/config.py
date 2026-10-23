@@ -11,6 +11,11 @@ class AgentConfig(BaseModel):
     verification_threshold: float = Field(default=0.85, description="Minimum confidence for fuzzy grounding")
     max_candidates_per_page: int = Field(default=8, description="Maximum ranked candidates verified per page")
     min_candidate_score: float = Field(default=2.0, description="Minimum contextual relevance score before accepting a candidate")
+    reranker_margin_threshold: float = Field(
+        default=0.75,
+        ge=0.0,
+        description="Invoke an optional local reranker only when top candidate scores are this close or closer.",
+    )
     user_agent: str = Field(
         default="InnerOS-AMD-MC4-WebRetrieval/0.2 (+https://github.com/Rafa-Innerchispa)",
         description="Polite crawler user-agent header",
