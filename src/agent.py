@@ -10,6 +10,7 @@ from .models.schema import RetrievalRequest, RetrievalResponse, VerificationStat
 from .parser.intent_parser import IntentParser
 from .planner.navigation_planner import NavigationPlanner
 from .provenance.tracker import ProvenanceTracker
+from .reranker.base import CandidateReranker
 from .search.search_engine import SearchEngine
 from .verifier.fail_closed_verifier import FailClosedVerifier
 
@@ -22,8 +23,13 @@ class WebRetrievalAgent:
     only when the exact value can be grounded back to the same page snapshot.
     """
 
-    def __init__(self, config: Optional[AgentConfig] = None):
+    def __init__(
+        self,
+        config: Optional[AgentConfig] = None,
+        reranker: Optional[CandidateReranker] = None,
+    ):
         self.config = config or DEFAULT_CONFIG
+        self.reranker = reranker
         self.parser = IntentParser()
         self.browser = NavigationEngine(
             timeout=self.config.request_timeout_seconds,
@@ -145,7 +151,28 @@ class WebRetrievalAgent:
                     intent,
                 )
 
-                for candidate in ranked[: self.config.max_candidates_per_page]:
+                reranker_used = False
+                ambiguity_detected = False
+                candidate_window = ranked[: self.config.max_candidates_per_page]
+                if len(candidate_window) >= 2:
+                    top = candidate_window[0]
+                    second = candidate_window[1]
+                    ambiguity_detected = (
+                        top.value != second.value
+                        and abs(top.score - second.score)
+                        <= self.config.reranker_margin_threshold
+                    )
+                    if ambiguity_detected and self.reranker is not None:
+                        reranked = self.reranker.rerank(
+                            query=request.query,
+                            candidates=candidate_window,
+                            page_text=snapshot.cleaned_text,
+                        )
+                        if reranked:
+                            candidate_window = list(reranked)[: self.config.max_candidates_per_page]
+                            reranker_used = True
+
+                for candidate in candidate_window:
                     if candidate.score < self.config.min_candidate_score:
                         continue
                     status, provenance = self.verifier.verify(
@@ -166,6 +193,8 @@ class WebRetrievalAgent:
                                 "candidate_score": round(candidate.score, 3),
                                 "elapsed_seconds": round(time.monotonic() - started, 3),
                                 "search_used": search_used,
+                                "ambiguity_detected": ambiguity_detected,
+                                "reranker_used": reranker_used,
                             },
                         )
 
