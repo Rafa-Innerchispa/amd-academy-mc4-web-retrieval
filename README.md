@@ -41,14 +41,17 @@ Implemented on the development branch:
 
 Development validation on the current implementation:
 
-- **65 tests passed**
+- **70 tests passed**
 - `python3 -m compileall -q src app tools`: **PASS**
 - offline retrieval benchmark: **all current cases PASS**
+- competitive adversarial benchmark: **25/25 PASS (100% exact-case accuracy)**
 - lightweight container packaging smoke: **PASS** (GitHub Actions run 39342544907)
 
 - exact-case accuracy: **1.0**
-- CI mocked benchmark p50: **2.109 ms**
-- CI mocked benchmark p95: **3.742 ms**
+- core CI mocked benchmark p50: **2.119 ms**
+- core CI mocked benchmark p95: **3.780 ms**
+- competitive benchmark p50: **1.789 ms**
+- competitive benchmark p95: **3.524 ms**
 - adversarial coverage: JSON/API responses, structured prompt injection, cross-domain redirects, absolute deadline enforcement, fragment deduplication, decoy-link backtracking, and current-vs-stale conflicting values
 
 Evidence:
@@ -56,6 +59,7 @@ Evidence:
 - `evidence/ci_validation_20261019.json`
 - `evidence/local_pytest_20261019.json`
 - `evidence/offline_benchmark_20261019.json`
+- `evidence/competitive_benchmark_20261022.json`
 
 These are local functional results, **not AMD hardware performance and not an official LabLab score**.
 
