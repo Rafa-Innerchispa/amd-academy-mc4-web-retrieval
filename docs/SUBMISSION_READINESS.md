@@ -68,8 +68,9 @@ PYTHONPATH=. python3 tools/benchmark_core.py
 Results:
 
 - **compileall: PASS**
-- **65 tests passed**
+- **74 tests passed**
 - offline benchmark: **all current cases PASS**
+- competitive adversarial benchmark: **30/30 PASS (synthetic, not official AMD grader)**
 - lightweight container packaging smoke: **PASS** (GitHub Actions run 39342544907)
 - cross-domain redirect regression: **PASS**
 - structured prompt-injection regressions: **PASS**
@@ -77,6 +78,9 @@ Results:
 - decoy-link backtracking E2E: **PASS**
 
 - exact-case accuracy: **1.0**
+- competitive benchmark p50/p95: **3.018 / 6.429 ms**
+- ambiguity gate activated: **3/30 cases (10%)**
+- baseline reranker calls: **0**
 - CI mocked latency p50: **2.109 ms**
 - CI mocked latency p95: **3.742 ms**
 
