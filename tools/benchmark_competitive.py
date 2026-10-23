@@ -189,7 +189,7 @@ CASES: List[Case] = [
              "https://stress.test/a": page('<a href="/b">Deep Widget catalog</a>'),
              "https://stress.test/b": page('<a href="/c">Deep Widget details</a>'),
              "https://stress.test/c": page("<p>Deep Widget current price: $615.00 USD.</p>"),
-         }, "$615.00", "https://stress.test/c", max_hops=4),,
+         }, "$615.00", "https://stress.test/c", max_hops=4),
     Case("person_ceo", "direct", "Who is the CEO of Acme Systems?",
          "https://stress.test/acme",
          {"https://stress.test/acme": page("<p>Acme Systems CEO: Maya Chen.</p>")},
