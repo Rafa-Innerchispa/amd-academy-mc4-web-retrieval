@@ -130,3 +130,24 @@ def test_same_product_previous_price_can_be_requested_explicitly():
     best = CandidateExtractor().best(html, "", intent)
     assert best is not None
     assert best.value == "$299.00"
+
+
+def test_json_ld_numeric_price_uses_semantic_price_path():
+    html = """
+    <script type="application/ld+json">
+    {
+      "@type": "Product",
+      "name": "Camera X",
+      "offers": {
+        "@type": "Offer",
+        "price": "549.00",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    <h1>Camera X</h1>
+    """
+    intent = IntentParser().parse("What is the price of Camera X?")
+    candidates = CandidateExtractor().extract(html, "Camera X", intent)
+    values = [candidate.value for candidate in candidates]
+    assert "549.00" in values
