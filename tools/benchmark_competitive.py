@@ -189,7 +189,30 @@ CASES: List[Case] = [
              "https://stress.test/a": page('<a href="/b">Deep Widget catalog</a>'),
              "https://stress.test/b": page('<a href="/c">Deep Widget details</a>'),
              "https://stress.test/c": page("<p>Deep Widget current price: $615.00 USD.</p>"),
-         }, "$615.00", "https://stress.test/c", max_hops=4),
+         }, "$615.00", "https://stress.test/c", max_hops=4),,
+    Case("person_ceo", "direct", "Who is the CEO of Acme Systems?",
+         "https://stress.test/acme",
+         {"https://stress.test/acme": page("<p>Acme Systems CEO: Maya Chen.</p>")},
+         "Maya Chen", "https://stress.test/acme"),
+    Case("count_inventory", "direct", "How many accelerator nodes are in Cluster A?",
+         "https://stress.test/cluster",
+         {"https://stress.test/cluster": page("<p>Cluster A currently contains 24 accelerator nodes.</p>")},
+         "24", "https://stress.test/cluster"),
+    Case("technical_dimensions", "direct", "What are the dimensions of Chassis Z?",
+         "https://stress.test/chassis",
+         {"https://stress.test/chassis": page("<p>Chassis Z dimensions: 300 x 200 x 50 mm.</p>")},
+         "300 x 200 x 50 mm", "https://stress.test/chassis"),
+    Case("mailto_only", "contact", "What is the email for Aurora Support?",
+         "https://stress.test/mailto",
+         {"https://stress.test/mailto": '<html><body><a href="mailto:support@aurora.example">Aurora Support</a></body></html>'},
+         "support@aurora.example", "https://stress.test/mailto"),
+    Case("jsonld_version_scalar", "structured", "What is the current version of Firmware Q?",
+         "https://stress.test/firmware",
+         {"https://stress.test/firmware": """
+         <script type="application/ld+json">
+         {"@type":"SoftwareApplication","name":"Firmware Q","version":"7.4.2"}
+         </script><h1>Firmware Q</h1>"""},
+         "7.4.2", "https://stress.test/firmware")
 ]
 
 
