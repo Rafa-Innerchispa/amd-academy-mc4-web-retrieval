@@ -165,12 +165,19 @@ class WebRetrievalAgent:
                 candidate_window = ranked[: self.config.max_candidates_per_page]
                 if len(candidate_window) >= 2:
                     top = candidate_window[0]
-                    second = candidate_window[1]
                     top_identity = self._candidate_identity(top.value, intent.target_attribute)
-                    second_identity = self._candidate_identity(second.value, intent.target_attribute)
+                    competitor = next(
+                        (
+                            item
+                            for item in candidate_window[1:]
+                            if self._candidate_identity(item.value, intent.target_attribute)
+                            != top_identity
+                        ),
+                        None,
+                    )
                     ambiguity_detected = (
-                        top_identity != second_identity
-                        and abs(top.score - second.score)
+                        competitor is not None
+                        and abs(top.score - competitor.score)
                         <= self.config.reranker_margin_threshold
                     )
                     if ambiguity_detected and self.reranker is not None:
