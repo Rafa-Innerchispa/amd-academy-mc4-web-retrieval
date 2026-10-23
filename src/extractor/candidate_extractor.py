@@ -62,10 +62,10 @@ class CandidateExtractor:
             r"(?<!\w)(?:\+?\d[\d().\-\s]{7,}\d)(?!\w)",
         ],
         "technical_spec": [
+            r"\b\d+(?:\.\d+)?\s*[x×]\s*\d+(?:\.\d+)?(?:\s*[x×]\s*\d+(?:\.\d+)?)?\s*(?:mm|cm|m|in|inches)?\b",
             r"\b\d+(?:\.\d+)?\s?(?:TB|TiB|GB|GiB|MB|MiB|KB|KiB|Hz|kHz|MHz|GHz|mW|W|kW|mV|V|mA|A|TFLOPS?|TOPS?|Gbps|Mbps|MB/s|GB/s|nm|mm|cm|kg|lbs?|ms|us|µs|ns)\b",
             r"\b\d+(?:\.\d+)?\s?°\s?[CF]\b",
             r"\b\d+(?:\.\d+)?\s?(?:degrees?\s+)?(?:Celsius|Fahrenheit)\b",
-            r"\b\d+(?:\.\d+)?\s*[x×]\s*\d+(?:\.\d+)?(?:\s*[x×]\s*\d+(?:\.\d+)?)?\s*(?:mm|cm|m|in|inches)?\b",
         ],
         "duration": [
             r"\b\d+(?:\.\d+)?(?:\s*[-–]\s*\d+(?:\.\d+)?)?\s*(?:business\s+)?(?:seconds?|secs?|minutes?|mins?|hours?|days?|weeks?|months?|years?)\b",
