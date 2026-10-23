@@ -44,6 +44,12 @@ jobs:
           set -o pipefail
           PYTHONPATH=. python tools/benchmark_core.py 2>&1 | tee benchmark-output.txt
 
+      - name: Competitive adversarial benchmark
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=. python tools/benchmark_competitive.py 2>&1 | tee benchmark-competitive-output.txt
+
       - name: Upload validation logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,6 +58,7 @@ jobs:
           path: |
             pytest-output.txt
             benchmark-output.txt
+            benchmark-competitive-output.txt
           if-no-files-found: ignore
 
 
