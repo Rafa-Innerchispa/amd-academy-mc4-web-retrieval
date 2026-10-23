@@ -227,6 +227,8 @@ def percentile(values: List[float], pct: float) -> float:
 def main() -> int:
     results = []
     latencies_ms = []
+    ambiguity_detected_cases = 0
+    reranker_used_cases = 0
     categories = defaultdict(lambda: {"passed": 0, "cases": 0})
 
     for case in CASES:
@@ -248,6 +250,10 @@ def main() -> int:
         source = response.provenance.source_url if response.provenance else None
         source_ok = source == case.expected_source
         passed = success_ok and answer_ok and source_ok
+        ambiguity_detected = bool(response.metadata.get("ambiguity_detected", False))
+        reranker_used = bool(response.metadata.get("reranker_used", False))
+        ambiguity_detected_cases += int(ambiguity_detected)
+        reranker_used_cases += int(reranker_used)
 
         categories[case.category]["cases"] += 1
         categories[case.category]["passed"] += int(passed)
@@ -261,6 +267,8 @@ def main() -> int:
             "source": source,
             "expected_source": case.expected_source,
             "navigation_steps": len(response.navigation_trail),
+            "ambiguity_detected": ambiguity_detected,
+            "reranker_used": reranker_used,
             "latency_ms": round(elapsed_ms, 3),
         })
 
@@ -281,6 +289,8 @@ def main() -> int:
         "exact_case_accuracy": round(passed_count / len(results), 4),
         "latency_ms_p50": round(statistics.median(latencies_ms), 3),
         "latency_ms_p95": round(percentile(latencies_ms, 0.95), 3),
+        "ambiguity_detected_cases": ambiguity_detected_cases,
+        "reranker_used_cases": reranker_used_cases,
         "categories": category_report,
         "results": results,
     }
