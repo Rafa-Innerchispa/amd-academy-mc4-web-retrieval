@@ -49,6 +49,15 @@ class WebRetrievalAgent:
             max_results=self.config.search_max_results,
         )
 
+    def _candidate_identity(self, value: str, attribute: str) -> str:
+        normalized = " ".join(str(value).strip().lower().split())
+        if attribute == "price":
+            normalized = normalized.replace("us$", "").replace("usd", "").replace("$", "")
+            normalized = normalized.replace(",", "").replace(" ", "")
+        elif attribute in {"technical_spec", "percentage", "duration"}:
+            normalized = normalized.replace(" ", "").replace("–", "-")
+        return normalized.strip()
+
     def execute(self, request: RetrievalRequest) -> RetrievalResponse:
         started = time.monotonic()
         deadline = started + self.config.total_budget_seconds
@@ -157,8 +166,10 @@ class WebRetrievalAgent:
                 if len(candidate_window) >= 2:
                     top = candidate_window[0]
                     second = candidate_window[1]
+                    top_identity = self._candidate_identity(top.value, intent.target_attribute)
+                    second_identity = self._candidate_identity(second.value, intent.target_attribute)
                     ambiguity_detected = (
-                        top.value != second.value
+                        top_identity != second_identity
                         and abs(top.score - second.score)
                         <= self.config.reranker_margin_threshold
                     )
