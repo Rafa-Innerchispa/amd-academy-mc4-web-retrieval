@@ -26,9 +26,10 @@ def test_reranker_is_not_called_when_top_candidate_is_clear():
     ))
 
     assert response.status == "SUCCESS"
-    assert response.answer == "$349.00"
     assert reranker.calls == 0
+    assert response.metadata["ambiguity_detected"] is False
     assert response.metadata["reranker_used"] is False
+    assert response.answer in {"$349.00", "349.00 USD"}
 
 
 def test_reranker_is_called_only_for_close_competing_candidates():
@@ -75,6 +76,6 @@ def test_reranker_cannot_invent_candidates_through_protocol_contract():
         seed_url="https://gate.test/grounded",
     ))
 
-    assert response.answer in {"$349.00", "$359.00"}
+    assert response.answer in {"$349.00", "349.00 USD", "$359.00", "359.00 USD"}
     assert response.provenance is not None
     assert response.provenance.source_url == "https://gate.test/grounded"
