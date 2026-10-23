@@ -125,3 +125,14 @@ def test_latency_and_percentage_exact_values():
     assert percentage_intent.target_attribute == "percentage"
     assert percentage is not None
     assert percentage.value == "99.9%"
+
+
+def test_composite_dimensions_beat_scalar_component():
+    intent = IntentParser().parse("What are the dimensions of Chassis Z?")
+    best = CandidateExtractor().best(
+        "<html></html>",
+        "Chassis Z dimensions: 300 x 200 x 50 mm.",
+        intent,
+    )
+    assert best is not None
+    assert best.value == "300 x 200 x 50 mm"
