@@ -1,0 +1,68 @@
+{
+  "observed_at": "2026-10-26T17:44:18Z",
+  "host": "ralfiia-amd",
+  "hardware": {
+    "gpu": "AMD Radeon AI PRO R9700",
+    "architecture": "gfx1201"
+  },
+  "production_runtime": {
+    "image": "rocm/vllm:rocm10.1.0_ubuntu24.04_py3.14-pytorch_2.13.0_vllm-0.29.0",
+    "image_id": "sha256:e0ea9a10b729573ea8598bdc073bda0ea382fe1037eec7c0761b6fa7f46baaf4",
+    "torch": "2.13.0+rocm10.1.0",
+    "hip_runtime_reported_by_torch": "7.16.26385",
+    "vllm": "0.29.1.dev0+g98dff2a81.d20261002",
+    "model": "QuantTrio/Qwen3-Coder-30B-A3B-Instruct-AWQ",
+    "endpoint": "http://127.0.0.1:8000",
+    "completion_probe": "ROCM101_OK"
+  },
+  "host_resources": {
+    "root_total_gib": 466,
+    "root_used_gib": 310,
+    "root_free_gib": 137,
+    "root_used_percent": 70,
+    "memory_total_gib": 30,
+    "memory_available_gib": 20,
+    "swap_total_gib": 15,
+    "swap_used_gib": 14
+  },
+  "match4_validation": {
+    "source_sha": "0f6ace630332cd75c48d16972bde8c8fcb9d53b8",
+    "pytest": {
+      "passed": 74,
+      "failed": 0,
+      "duration_seconds": 1.59
+    },
+    "core_benchmark": {
+      "cases": 16,
+      "passed": 16,
+      "exact_case_accuracy": 1.0,
+      "latency_ms_p50": 1.707,
+      "latency_ms_p95": 4.754
+    },
+    "competitive_adversarial_benchmark": {
+      "official_amd_score": false,
+      "cases": 30,
+      "passed": 30,
+      "exact_case_accuracy": 1.0,
+      "latency_ms_p50": 1.186,
+      "latency_ms_p95": 2.763,
+      "ambiguity_detected_cases": 3,
+      "reranker_used_cases": 0
+    }
+  },
+  "lablab_public_release_state": {
+    "checked_on": "2026-10-26",
+    "submissions_open": true,
+    "general_project_submissions_visible": true,
+    "official_mini_challenge_results_visible": ["MC2", "MC3"],
+    "official_mc4_evaluator_or_image_field_publicly_visible": false
+  },
+  "truth_boundary": {
+    "rocm101_production_runtime_verified": true,
+    "match4_source_and_synthetic_benchmarks_verified_on_amd_host": true,
+    "final_match4_docker_image_built": false,
+    "official_match4_contract_recovered": false,
+    "official_match4_grader_score": null,
+    "public_match4_image_published": false
+  }
+}
