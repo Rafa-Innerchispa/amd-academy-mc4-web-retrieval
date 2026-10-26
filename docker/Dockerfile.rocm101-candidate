@@ -1,0 +1,25 @@
+# ENGINEERING CANDIDATE ONLY — NOT THE OFFICIAL MATCH 4 FINAL IMAGE
+#
+# This image validates the Match 4 adapter and retrieval core on the physical
+# R9700 host after its ROCm 10.1 migration. The final graded image must still
+# follow the exact AMD/LabLab Match 4 contract when that contract is published.
+FROM rocm/vllm:rocm10.1.0_ubuntu24.04_py3.14-pytorch_2.13.0_vllm-0.29.0
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    AGENT_OUTPUT=/app/output
+
+WORKDIR /app
+
+COPY requirements-runtime.txt /app/requirements-runtime.txt
+RUN pip install --no-cache-dir -r /app/requirements-runtime.txt
+
+COPY src/ /app/src/
+COPY app/app.py /app/app.py
+COPY tools/selfcheck_program_rules.py /app/tools/selfcheck_program_rules.py
+
+RUN mkdir -p /app/output
+
+# Programme-style container: no HTTP service and no exposed port.
+CMD ["sleep", "infinity"]
