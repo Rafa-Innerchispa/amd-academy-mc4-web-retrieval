@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-10-26T17:44:18Z",
+  "observed_at": "2026-10-26T17:51:36Z",
   "host": "ralfiia-amd",
   "hardware": {
     "gpu": "AMD Radeon AI PRO R9700",
@@ -26,7 +26,7 @@
     "swap_used_gib": 14
   },
   "match4_validation": {
-    "source_sha": "0f6ace630332cd75c48d16972bde8c8fcb9d53b8",
+    "source_sha_before_evidence_updates": "0f6ace630332cd75c48d16972bde8c8fcb9d53b8",
     "pytest": {
       "passed": 74,
       "failed": 0,
@@ -50,6 +50,18 @@
       "reranker_used_cases": 0
     }
   },
+  "rocm101_engineering_container": {
+    "official_final_image": false,
+    "dockerfile": "docker/Dockerfile.rocm101-candidate",
+    "local_tag": "amd-mc4-rocm101-candidate:local",
+    "image_id": "sha256:3625d6779a246066ee42860e5695375651b42713bd109843c54da8307dc2c566",
+    "size_bytes": 31290255869,
+    "size_gib": 29.141,
+    "network_none_smoke": "PASS",
+    "agent_import": "PASS",
+    "exposed_ports": null,
+    "published": false
+  },
   "lablab_public_release_state": {
     "checked_on": "2026-10-26",
     "submissions_open": true,
@@ -60,6 +72,7 @@
   "truth_boundary": {
     "rocm101_production_runtime_verified": true,
     "match4_source_and_synthetic_benchmarks_verified_on_amd_host": true,
+    "rocm101_engineering_container_built_and_smoked": true,
     "final_match4_docker_image_built": false,
     "official_match4_contract_recovered": false,
     "official_match4_grader_score": null,
