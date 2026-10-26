@@ -1,114 +1,183 @@
 # AMD AI League — Match 4: Intelligent Web Information Retrieval
-**Repository:** `amd-academy-mc4-web-retrieval`  
-**Milestone:** AMD AI League Match 4 (Oct 13 – Oct 27, 2026 | 1,800 pts)  
-**Execution Environment:** Local-first on AMD Hardware & ROCm (Zero Paid External APIs)  
-**Target Architecture:** Autonomous Web Retrieval Agent with Fail-Closed Anti-Hallucination & Provenance Guarantee
 
----
+**Human task ID:** `MATCH4-WEB-RETRIEVAL`  
+**Active window:** October 13–27, 2026  
+**Points:** 1,800  
+**Current branch:** `chatgpt/mc4-core-20261019`
 
-## 1. Overview & Challenge Objective
-As published by the official AMD AI League on LabLab.ai:
-> *"Build an AI agent that can navigate websites, understand a natural-language request and accurately retrieve the specific information a user needs."*
+> Build an AI agent that can navigate websites, understand a natural-language request and accurately retrieve the specific information a user needs.
 
-This repository houses an independent, production-grade scaffold designed from first principles for Match 4. It operates strictly **local-first** on AMD ROCm compute, decoupling the navigation and reasoning logic from external commercial APIs.
+## Current state
 
----
+This repository is now an active Match 4 implementation rather than a scaffold.
 
-## 2. Core Pillars
+Implemented on the development branch:
 
-1. **Local-First AMD/ROCm Acceleration**:
-   - Model inference powered by local Small Language Models (e.g. Llama-3.2-3B, Qwen2.5-Coder-7B) running via ROCm / HIP / llama.cpp-hip / vLLM-rocm.
-   - Zero dependency on external paid API endpoints (OpenAI, Anthropic, Google).
-2. **Deterministic & Bounded Navigation**:
-   - Bounded hops ($N \le 5$) with loop detection, domain restrictions, and strict execution timeouts.
-   - Safe HTTP / headless browser abstraction with DOM distillation.
-3. **Fail-Closed Anti-Hallucination Engine**:
-   - Every extracted claim or datum must be grounded in an exact or high-confidence fuzzy match against the snapshot DOM.
-   - If evidence is absent, the agent fails closed (`UNVERIFIABLE_CLAIM` / `NOT_FOUND`), refusing to generate unbacked assumptions.
-4. **Cryptographic Provenance & Evidence Audit**:
-   - Every retrieved fact is stamped with the SHA-256 checksum of the rendered DOM snapshot, URL, timestamp, and character offset coordinates.
-5. **Strict Architectural Isolation**:
-   - Entirely standalone repository. Zero dependencies or couplings with prior milestone modules (MC3, ACT III, InnerOS).
+- bounded best-first same-domain navigation with loop prevention and dead-end backtracking
+- URL + visible-anchor ranking for opaque links
+- deterministic intent parsing
+- context-ranked exact-value extraction
+- prices, dates, versions, email, phone, opening hours, counts, people and technical values
+- HTML table extraction
+- JSON-LD and raw JSON/API response extraction
+- mailto/tel extraction
+- exact/fuzzy evidence verification
+- raw-HTML grounding for structured data
+- SHA-256 provenance with coordinate-space tracking
+- fail-closed behavior when evidence is insufficient
+- SSRF/private/link-local/loopback blocking by default
+- redirect validation before following, including cross-domain redirect escape blocking
+- explicit allowlist for grader-provided internal hosts
+- bounded wall-clock retrieval budget
+- atomic JSON output helpers
+- path-traversal-safe, bounded grader output IDs
+- provisional `/app/app.py` grader adapter
+- common grader CLI aliases (`-q`, `--input-file`, `--tasks`) for compatibility without changing fail-closed semantics
+- isolated product/demo UI under `demo/`
+- provisional ROCm programme-level Docker baseline
+- repeatable offline validation and image-release runbooks
 
----
+## Current local evidence
 
-## 3. Directory Structure
+Development validation on the current implementation:
+
+- **74 tests passed**
+- `python3 -m compileall -q src app tools`: **PASS**
+- offline retrieval benchmark: **all current cases PASS**
+- competitive adversarial benchmark: **30/30 PASS (100% exact-case accuracy)**
+- lightweight container packaging smoke: **PASS** (GitHub Actions run 39342544907)
+
+- exact-case accuracy: **1.0**
+- core CI mocked benchmark p50: **2.119 ms**
+- core CI mocked benchmark p95: **3.780 ms**
+- competitive benchmark p50: **3.018 ms**
+- competitive benchmark p95: **6.429 ms**
+- ambiguity gate activated: **3/30 cases (10%)**
+- reranker invocations in baseline: **0**
+- adversarial coverage: JSON/API responses, structured prompt injection, cross-domain redirects, absolute deadline enforcement, fragment deduplication, decoy-link backtracking, and current-vs-stale conflicting values
+
+Evidence:
+
+- `evidence/ci_validation_20261019.json`
+- `evidence/local_pytest_20261019.json`
+- `evidence/offline_benchmark_20261019.json`
+- `evidence/competitive_benchmark_20261022.json`
+
+These are local functional results, **not AMD hardware performance and not an official LabLab score**.
+
+## Architecture
+
 ```text
-amd-academy-mc4-web-retrieval/
-├── README.md
-├── requirements.txt
-├── pyproject.toml
-├── .gitignore
-├── docs/
-│   ├── CHALLENGE_CONTRACT.md    # Official links, Facts vs Assumptions vs Pending Releases
-│   ├── ARCHITECTURE.md          # ROCm local-first agent design & data flow
-│   ├── RISK_REGISTER.md         # Technical, model, and grader risks with mitigations
-│   └── IMPLEMENTATION_PLAN.md   # Prioritized backlog (P0-P3) & roadmap
-├── src/
-│   ├── __init__.py
-│   ├── config.py                # Agent configuration and resource bounds
-│   ├── agent.py                 # Core WebRetrievalAgent orchestrator
-│   ├── cli.py                   # Command-line interface
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── schema.py            # Pydantic schemas (Request, Response, Evidence, etc.)
-│   ├── parser/
-│   │   ├── __init__.py
-│   │   └── intent_parser.py     # NL Intent Parsing & constraint extraction
-│   ├── planner/
-│   │   ├── __init__.py
-│   │   └── navigation_planner.py# Bounded navigation state machine
-│   ├── browser/
-│   │   ├── __init__.py
-│   │   └── navigation_engine.py # HTTP/headless browser client with retry bounds
-│   ├── extractor/
-│   │   ├── __init__.py
-│   │   └── dom_extractor.py     # Boilerplate stripper & markdown/table extraction
-│   ├── verifier/
-│   │   ├── __init__.py
-│   │   └── fail_closed_verifier.py # Anti-hallucination grounding verification
-│   └── provenance/
-│       ├── __init__.py
-│       └── tracker.py           # SHA-256 evidence logging & provenance records
-└── tests/
-    ├── test_parser.py
-    ├── test_planner.py
-    ├── test_extractor.py
-    ├── test_fail_closed.py
-    ├── test_provenance.py
-    └── test_agent_e2e.py
+Natural-language request
+          │
+          ▼
+    Intent parser
+          │
+          ▼
+ Bounded navigator ─── URL safety policy
+          │
+          ▼
+  HTML / structured data
+          │
+          ├── clean text
+          ├── tables
+          ├── JSON-LD
+          ├── raw JSON / APIs
+          └── mailto / tel
+          │
+          ▼
+ Context-ranked candidates
+          │
+          ▼
+ Fail-closed verifier
+          │
+          ├── unsupported → refusal
+          └── verified → exact answer + source + snapshot hash
 ```
 
----
+The design favors grounded extraction over free-form synthesis. A local AMD/ROCm model can still be added as a difficult-case reranker once the official grader budget and runtime contract are known.
 
-## 4. Quickstart
+## Quickstart
 
-### Prerequisites
-- Python 3.10+
-- PyTorch with ROCm support (for GPU acceleration on AMD Radeon/Instinct) or standard CPU fallback
-- Linux / WSL2 environment
-
-### Installation
 ```bash
-git clone https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval.git
-cd amd-academy-mc4-web-retrieval
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+bash scripts/run_offline_validation.sh
 ```
 
-### Running Tests
-Execute the full verification test suite:
+CLI:
+
 ```bash
-pytest -v tests/
+python3 -m src.cli \
+  --query "What is the release date of ROCm 6.2?" \
+  --url "https://rocm.docs.amd.com" \
+  --json
 ```
 
-### Running the CLI
+## Provisional grader adapter
+
+The branch includes `app/app.py` as a tolerant compatibility layer while the official Match 4 contract remains unavailable publicly.
+
+It supports common query/ID/start-URL aliases, batch JSON input, atomic output, and fail-closed empty results. This adapter is intentionally replaceable and will be narrowed to the exact official schema once AMD/LabLab publishes the Match 4 starter kit.
+
+## Demo UI
+
+The product/demo layer is separate from the graded image:
+
 ```bash
-python3 -m src.cli --query "What is the release date of ROCm 6.2?" --url "https://rocm.docs.amd.com"
+python -m demo.server
 ```
 
----
+Open:
 
-## 5. Official Requirement Traceability
-See [CHALLENGE_CONTRACT.md](docs/CHALLENGE_CONTRACT.md) for the complete facts, assumptions, pending releases, and the requirement traceability matrix.
+```text
+http://127.0.0.1:8787
+```
+
+It shows the requested fact, verified answer, evidence source, evidence excerpt, snapshot SHA-256, navigation trail and explicit fail-closed state.
+
+## Programme-level container baseline
+
+The user-provided official MC3 starter kit says container rules are shared across the challenge programme and that MC2/MC3 use the same base image, size/VRAM rules and no-server/no-port shape.
+
+This repo therefore includes:
+
+- `docker/Dockerfile.contract-baseline`
+- `.dockerignore`
+- `tools/selfcheck_program_rules.py`
+- `scripts/build_contract_baseline.sh`
+- `scripts/validate_contract_baseline.sh`
+- `docs/MC3_STARTER_KIT_LESSONS.md`
+- `docs/IMAGE_RELEASE_RUNBOOK.md`
+- `docs/SUBMISSION_READINESS.md`
+- `docs/LABLAB_SUBMISSION.md`
+
+The provisional Dockerfile already copies the retrieval core and `/app/app.py` into the ROCm 10 baseline while keeping the no-port execution model.
+
+## Submission strategy
+
+1. recover the official Match 4 starter kit / grader contract
+2. reduce the compatibility adapter to the exact required schema
+3. run official sample/selfcheck
+4. build on AMD hardware
+5. prove GPU use, timing, VRAM and uncompressed image size
+6. publish the public image
+7. verify anonymous pull
+8. re-run the pulled image on AMD
+9. record immutable digest
+10. submit when LabLab exposes or documents the Match 4 submission route
+
+## Truth boundary
+
+The public League page confirms Match 4, dates, points and mission. It does not currently expose a usable Match 4 starter-kit/detail destination from the visible public control.
+
+Accordingly, this repository does not present guessed Match 4 grader details as official requirements.
+
+## Project family
+
+Canonical AMD AI League umbrella:
+
+https://github.com/Rafa-Innerchispa/inneros-amd-ai-league-2026
+
+Match 2 and Match 3 remain independently verified artifacts. Match 4 remains **ACTIVE DEVELOPMENT** until the final public container and official grader evidence are complete.

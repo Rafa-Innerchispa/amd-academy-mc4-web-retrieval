@@ -1,0 +1,76 @@
+name: Match 4 Python validation
+
+on:
+  push:
+    branches:
+      - "chatgpt/mc4-core-20261019"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile
+        run: python -m compileall -q src app tools
+
+      - name: Unit tests
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -vv 2>&1 | tee pytest-output.txt
+
+      - name: Offline benchmark
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=. python tools/benchmark_core.py 2>&1 | tee benchmark-output.txt
+
+      - name: Competitive adversarial benchmark
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=. python tools/benchmark_competitive.py 2>&1 | tee benchmark-competitive-output.txt
+
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: match4-validation-logs
+          path: |
+            pytest-output.txt
+            benchmark-output.txt
+            benchmark-competitive-output.txt
+          if-no-files-found: ignore
+
+
+  container-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build lightweight packaging image
+        run: docker build -f docker/Dockerfile.ci-smoke -t mc4-ci-smoke .
+
+      - name: Run isolated container smoke
+        run: docker run --rm --network none mc4-ci-smoke python3 /app/ci_container_smoke.py

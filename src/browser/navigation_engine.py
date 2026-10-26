@@ -1,51 +1,117 @@
 import hashlib
-import urllib.request
+import time
 from datetime import datetime, timezone
-from typing import Optional, Dict
-from ..models.schema import DOMSnapshot
+from typing import Dict
+from urllib.parse import urljoin
+
 from ..extractor.dom_extractor import DOMExtractor
+from ..models.schema import DOMSnapshot
+from .url_policy import URLPolicy, URLPolicyError
+
 
 class NavigationEngine:
-    """
-    Safe HTTP / Mock retrieval engine with retry bounds and snapshot hashing.
-    Runs zero-dependency with urllib.request and falls back gracefully.
-    """
+    """Bounded HTTP retrieval with provenance snapshots and URL safety checks."""
 
-    def __init__(self, timeout: float = 15.0, user_agent: str = "AMDAILeague-MC4"):
+    REDIRECT_CODES = {301, 302, 303, 307, 308}
+
+    def __init__(
+        self,
+        timeout: float = 15.0,
+        user_agent: str = "AMDAILeague-MC4",
+        max_redirects: int = 5,
+        allow_private_network_targets: bool = False,
+        allowed_private_hosts=(),
+    ):
         self.timeout = timeout
         self.user_agent = user_agent
+        self.max_redirects = max_redirects
         self.extractor = DOMExtractor()
+        self.url_policy = URLPolicy(
+            allow_private_network_targets=allow_private_network_targets,
+            allowed_private_hosts=allowed_private_hosts,
+        )
         self._mock_responses: Dict[str, str] = {}
 
     def register_mock(self, url: str, html_body: str):
         self._mock_responses[url] = html_body
 
-    def fetch(self, url: str) -> DOMSnapshot:
+    def fetch(
+        self,
+        url: str,
+        allowed_host: str | None = None,
+        deadline_monotonic: float | None = None,
+    ) -> DOMSnapshot:
         timestamp_utc = datetime.now(timezone.utc).isoformat()
+        normalized_allowed_host = (
+            allowed_host.rstrip(".").lower() if allowed_host else None
+        )
 
         if url in self._mock_responses:
             html = self._mock_responses[url]
             status_code = 200
         else:
             try:
-                # Try requests first if available
                 import requests
-                headers = {"User-Agent": self.user_agent}
-                resp = requests.get(url, headers=headers, timeout=self.timeout)
-                status_code = resp.status_code
-                html = resp.text
-            except ImportError:
-                # Zero-dependency standard library fallback
-                try:
-                    req = urllib.request.Request(url, headers={"User-Agent": self.user_agent})
-                    with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                        status_code = resp.status
-                        html = resp.read().decode("utf-8", errors="replace")
-                except Exception as net_err:
-                    html = f"<html><body><h1>Fetch Error: {str(net_err)}</h1></body></html>"
-                    status_code = 502
-            except Exception as e:
-                html = f"<html><body><h1>Fetch Error: {str(e)}</h1></body></html>"
+
+                current_url = url
+                response = None
+                for _ in range(self.max_redirects + 1):
+                    if deadline_monotonic is not None:
+                        remaining = deadline_monotonic - time.monotonic()
+                        if remaining <= 0:
+                            raise TimeoutError("TIME_BUDGET_EXCEEDED")
+                        request_timeout = min(self.timeout, max(0.001, remaining))
+                    else:
+                        request_timeout = self.timeout
+
+                    self.url_policy.validate(current_url)
+                    response = requests.get(
+                        current_url,
+                        headers={"User-Agent": self.user_agent},
+                        timeout=request_timeout,
+                        allow_redirects=False,
+                    )
+
+                    if response.status_code not in self.REDIRECT_CODES:
+                        break
+
+                    location = response.headers.get("Location")
+                    if not location:
+                        break
+
+                    next_url = urljoin(current_url, location)
+                    # Validate BEFORE following so a public URL cannot redirect
+                    # the agent into localhost, metadata services, RFC1918, or
+                    # a different public domain when same-site navigation is
+                    # required by the caller.
+                    self.url_policy.validate(next_url)
+                    if normalized_allowed_host:
+                        from urllib.parse import urlparse
+
+                        redirect_host = (
+                            (urlparse(next_url).hostname or "").rstrip(".").lower()
+                        )
+                        if redirect_host != normalized_allowed_host:
+                            raise URLPolicyError("CROSS_DOMAIN_REDIRECT_BLOCKED")
+                    current_url = next_url
+                else:
+                    raise RuntimeError("TOO_MANY_REDIRECTS")
+
+                if response is None:
+                    raise RuntimeError("NO_HTTP_RESPONSE")
+
+                url = current_url
+                status_code = response.status_code
+                html = response.text
+
+            except URLPolicyError as exc:
+                html = f"<html><body>Blocked URL: {exc}</body></html>"
+                status_code = 403
+            except TimeoutError:
+                html = "<html><body>TIME_BUDGET_EXCEEDED</body></html>"
+                status_code = 504
+            except Exception as exc:
+                html = f"<html><body>Fetch Error: {type(exc).__name__}</body></html>"
                 status_code = 502
 
         content_hash = hashlib.sha256(html.encode("utf-8")).hexdigest()
@@ -57,5 +123,5 @@ class NavigationEngine:
             content_hash=content_hash,
             raw_html=html,
             cleaned_text=clean_text,
-            timestamp_utc=timestamp_utc
+            timestamp_utc=timestamp_utc,
         )

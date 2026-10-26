@@ -1,60 +1,137 @@
-# Official Challenge Contract — AMD AI League Match 4
+# AMD AI League Match 4 — Challenge Contract
 
-## 1. Challenge Metadata & Canonical Sources
-* **Competition:** AMD AI League (LabLab.ai)
-* **Milestone:** Match 4 — Intelligent Web Information Retrieval
-* **Active Window:** October 13, 2026 – October 27, 2026
-* **Reward:** 1,800 Points
-* **Official Portal:** [LabLab.ai AMD AI League](https://lablab.ai/event/amd)
-* **AMD Playbooks Reference:** [github.com/amd/playbooks](https://github.com/amd/playbooks)
-* **AMD Skills Reference:** [github.com/amd/skills](https://github.com/amd/skills)
+Last reviewed: 2026-10-19
 
----
+## Canonical public source
 
-## 2. Rigorous Fact, Assumption & Pending Releases Separation
+AMD AI League on LabLab:
 
-### A. CONFIRMED FACTS (Publicly Published)
-1. **Challenge Name:** Match 4: Intelligent Web Information Retrieval.
-2. **Timeline:** October 13 – October 27, 2026.
-3. **Point Value:** 1,800 points.
-4. **Stated Mission:** *"Build an AI agent that can navigate websites, understand a natural-language request and accurately retrieve the specific information a user needs."*
-5. **Compute & Technology Stack:** Hosted on AMD infrastructure (AMD Developer Cloud / ROCm), requiring workloads compatible with AMD GPUs.
-6. **Cost Model:** Strictly local-first execution. Zero dependence on paid external LLM APIs.
+- Match 4: **Intelligent Web Information Retrieval**
+- Active window: **October 13–27, 2026**
+- Points: **1,800**
+- Public mission: **build an AI agent that can navigate websites, understand a natural-language request and accurately retrieve the specific information a user needs**
+- Match 4 is marked **Live now**
+- LabLab states that participants do not need their own AMD hardware or cloud credits; the hackathon notebook environment provides AMD GPU infrastructure.
 
-### B. ARCHITECTURAL ASSUMPTIONS (Engineered Best Practices)
-1. **Input Interface:** The agent accepts a user request containing:
-   - A natural language question or target retrieval specification.
-   - An optional or inferred initial URL / seed domain.
-2. **Navigation Complexity:** Retrieval tasks will test:
-   - Direct single-page extraction.
-   - Multi-step intra-site navigation (following links, paging, searching).
-   - Tabular and structured list parsing.
-3. **Execution Guardrails:** Autonomous loops must be strictly bounded ($N \le 5$ navigation hops, max 30s per fetch) to prevent hanging during grading.
-4. **Ground Truth Validation:** Graders in automated AI benchmarks compare extracted values against exact ground truth; therefore, strict text grounding and verbatim span extraction is prioritized over generative summarization.
-5. **Local Inference Engine:** AMD ROCm PyTorch / HIP inference using small instruction models (Llama-3.2-3B-Instruct, Qwen2.5-Coder-7B-Instruct) quantized in INT4/INT8 to fit within 8GB–16GB VRAM bounds.
+Public League page:
+https://lablab.ai/ai-hackathons/amd-lablab-ai-academy-challenge
 
-### C. PENDING LABLAB RELEASES (Awaiting Official Grader Brief)
-The following specifications remain unreleased as of October 13, 2026 (status: "Coming soon"):
-1. **Grader Protocol / Entrypoint:** Whether the grader will invoke a CLI command (`python agent.py --input in.json --output out.json`), a REST API container (`POST /retrieve`), or an interactive web UI.
-2. **Official Dataset / Domains:** Whether targets are live internet sites or offline mocked sandboxes.
-3. **Official Base Docker Image:** Exact ROCm version (`rocm/pytorch:rocm6.2_ubuntu22.04` or similar).
-4. **Scoring Breakdown:** Exact weighting between:
-   - Accuracy / Exact Match (EM) & F1 Score.
-   - Provenance / Citation fidelity.
-   - Retrieval Latency & Step Count.
+## Official release-state verification — 2026-10-19
 
-> **Policy on Unknowns:** Under no circumstances shall this codebase hardcode unreleased grader constraints as facts. All integrations with the grader are isolated behind an adapter pattern (`src/agent.py` and `src/cli.py`) for rapid adaptation once the brief drops.
+Two first-party LabLab sources were rechecked:
 
----
+1. The live AMD AI League event page explicitly lists Match 4 as **Live now**, ending **October 27**, worth **1,800 points**, with the mission to build an agent that navigates websites, understands a natural-language request, and retrieves the specific information requested.
+2. The official LabLab announcement email dated **October 13, 2026** ("Match 3 is closed - Match 4 starts now!") repeats the same mission, deadline and point value.
 
-## 3. Requirement Traceability Matrix
+The event page exposes a downloadable starter kit and a real Google Drive challenge brief for Match 3. In contrast, the visible Match 4 **View match details** control currently has no usable external destination; following it returns to the League page. The official launch email has no Match 4 attachment and contains no grader, Docker, schema, network, or selfcheck details.
 
-| Official Requirement | Implementation Component | Test Suite | Evidence Artifact |
-| :--- | :--- | :--- | :--- |
-| **Natural Language Request Understanding** | `src/parser/intent_parser.py` | `tests/test_parser.py` | Structured `ParsedIntent` JSON with entities, targets, and constraints |
-| **Website Navigation & Link Traversal** | `src/planner/navigation_planner.py`, `src/browser/navigation_engine.py` | `tests/test_planner.py` | `NavigationStep` trail with loop prevention and bounded hops |
-| **DOM & Content Extraction** | `src/extractor/dom_extractor.py` | `tests/test_extractor.py` | Clean markdown DOM text and structured table key-value pairs |
-| **Accurate Information Retrieval** | `src/agent.py` | `tests/test_agent_e2e.py` | Verbatim text answer matching target query criteria |
-| **Anti-Hallucination & Fail-Closed** | `src/verifier/fail_closed_verifier.py` | `tests/test_fail_closed.py` | Rejection response with `UNVERIFIABLE_CLAIM` when ground truth missing |
-| **Citation & Provenance** | `src/provenance/tracker.py` | `tests/test_provenance.py` | `ProvenanceRecord` containing SHA-256 snapshot hashes and offsets |
-| **Local-First AMD/ROCm Stack** | `src/config.py`, ROCm runtime | Unit & Mock harnesses | Zero external API calls verified in test logs |
+Therefore, as of 2026-10-19, we have strong first-party confirmation of the **task mission and schedule**, but no publicly recoverable first-party Match 4 technical contract. This is a publication-state gap, not permission to infer the missing grader rules from competitor implementations.
+
+## Live LabLab submission-form check — 2026-10-19
+
+An authenticated read of the team's current LabLab submission form shows Step 1 exposing exactly these challenge-artifact fields:
+
+- `Mini Challenge 2 Image`
+- `Mini Challenge 3 Image`
+
+There is **no visible Mini Challenge 4 Image field** in the current form at the time of this check.
+
+This is evidence about the present UI only. It does not prove that Match 4 will never use this form or that a separate publication route will not appear. The final Match 4 image should therefore be prepared independently and held ready for the moment LabLab exposes or documents the submission mechanism.
+
+## Important release-state finding
+
+As of this review, the public League page exposes a working Match 3 starter-kit link, but the visible **View match details** control for Match 4 does not expose a usable destination or downloadable starter kit from the public page.
+
+Therefore the following are **not yet treated as confirmed official facts in this repository**:
+
+- exact Match 4 grader entrypoint
+- exact input JSON schema
+- exact output JSON schema
+- mandatory Docker base image
+- network policy during grading
+- startup / per-query / total runtime budgets
+- GPU VRAM bounds
+- maximum image size
+- whether the grader supplies a seed URL, a search query, or both
+- whether JavaScript rendering/headless Chromium is available or required
+- exact submission field for the Match 4 image in LabLab
+
+The repository keeps the internal retrieval core isolated from the future grader adapter so these details can be wired in without rewriting the engine.
+
+## Confirmed requirements mapped to implementation
+
+| Public requirement | Current implementation |
+| --- | --- |
+| Understand natural-language request | `src/parser/intent_parser.py` |
+| Navigate websites | `src/planner/navigation_planner.py`, `src/browser/navigation_engine.py` |
+| Retrieve specific information accurately | `src/extractor/candidate_extractor.py` |
+| Ground answer in fetched evidence | `src/verifier/fail_closed_verifier.py` |
+| Keep provenance | `src/provenance/tracker.py` |
+| Bounded autonomous behavior | hop budget + loop prevention |
+| Safe web access | public-address URL policy + redirect revalidation |
+| Product/demo usability | isolated `demo/` presentation layer |
+
+## Engineering assumptions, not official rules
+
+Until the official Match 4 grader brief or starter kit is available, these remain design choices:
+
+- a seed URL may be supplied with the query
+- one exact value is preferable to a generic summary
+- source URL/provenance should accompany the value
+- unsupported answers should fail closed
+- tables and JSON-LD are useful structured sources
+- navigation should stay bounded
+- page content must be treated as untrusted data
+- private/loopback/link-local network destinations must be blocked
+
+These choices are deliberately conservative and easy to adapt.
+
+## Public competitor observations
+
+Public Match 4 submissions visible on LabLab already describe Dockerized retrieval agents with exact-value answers, source URLs, bounded navigation, local AMD/ROCm inference or deterministic extraction, and fail-closed behavior.
+
+Those submissions are useful evidence that the implementation direction is reasonable, but they are **not authoritative challenge specifications** and are not used here to invent grader rules.
+
+## Third-party contract corroboration — not authoritative
+
+A fresh public submission review on 2026-10-19 found an independent Match 4 team describing its tested League container contract as:
+
+- entrypoint: `python3 /app/app.py`
+- one JSON output file per question under `/app/output`
+- ROCm 10 / PyTorch 2.13 / Python 3.14 base/runtime family
+- per-request engineering budget around 24 seconds
+- exact value + source URL, empty answer when evidence is missing
+
+This aligns closely with the current provisional adapter and programme-level baseline in this repository. It remains **third-party evidence only** until AMD/LabLab publishes or exposes the actual Match 4 technical brief. Do not convert these observations into hard official requirements without first-party confirmation.
+
+## Submission gate
+
+Do **not** mark Match 4 READY until all of these exist:
+
+- official/current grader contract recovered
+- grader adapter implemented
+- full unit and held-out tests green
+- official starter-kit/sample run green if/when released
+- Docker image built on AMD-compatible runtime
+- public registry image
+- anonymous pull verified
+- public pulled image re-run
+- immutable digest recorded
+- exact LabLab submission route confirmed
+
+## Separation from the demo UI
+
+The `demo/` UI is a presentation and product-use layer only.
+
+The future graded container must remain minimal and must not depend on the demo UI unless the official grader explicitly requires a web interface.
+
+
+## Programme-level evidence from the official MC3 starter kit
+
+The user-provided official MC3 starter kit states that the container rules are the same for every challenge in the programme. It also confirms that MC2 and MC3 use the same ROCm base, the same image-size/VRAM rules, and the same no-server/no-port container shape.
+
+This is strong evidence for preparing the Match 4 container baseline now, while still keeping the Match 4-specific grader invocation and output schema unfrozen.
+
+One important consequence is network topology: MC3 evaluation has no outbound network. Match 4 is a web-navigation task, so the official Match 4 kit may provide websites through an internal/sandbox network rather than the public internet. The retrieval engine therefore blocks private targets by default but supports an explicit allowlist for grader-provided internal hosts. We will not enable broad private-network access unless the official Match 4 contract requires it.
+
+See `docs/MC3_STARTER_KIT_LESSONS.md`.

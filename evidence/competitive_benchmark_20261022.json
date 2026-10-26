@@ -1,0 +1,56 @@
+{
+  "benchmark": "competitive_adversarial_synthetic_v1",
+  "official_amd_score": false,
+  "github_actions_run": 39891751054,
+  "github_actions_job": 120212891688,
+  "branch": "chatgpt/mc4-core-20261019",
+  "head": "be91afa9560ca50c45a145f116f0f5e7a33abe49",
+  "generated_at_utc": "2026-10-23T02:50:43Z",
+  "note": "Synthetic deterministic engineering benchmark. Not the official AMD/LabLab grader and not directly comparable across different datasets.",
+  "cases": 30,
+  "passed": 30,
+  "failed": 0,
+  "exact_case_accuracy": 1,
+  "latency_ms_p50": 3.018,
+  "latency_ms_p95": 6.429,
+  "ambiguity_detected_cases": 3,
+  "ambiguity_rate": 0.1,
+  "reranker_used_cases": 0,
+  "categories": {
+    "adversarial": {
+      "passed": 2,
+      "cases": 2,
+      "accuracy": 1
+    },
+    "conflict": {
+      "passed": 4,
+      "cases": 4,
+      "accuracy": 1
+    },
+    "contact": {
+      "passed": 3,
+      "cases": 3,
+      "accuracy": 1
+    },
+    "direct": {
+      "passed": 10,
+      "cases": 10,
+      "accuracy": 1
+    },
+    "navigation": {
+      "passed": 4,
+      "cases": 4,
+      "accuracy": 1
+    },
+    "refusal": {
+      "passed": 3,
+      "cases": 3,
+      "accuracy": 1
+    },
+    "structured": {
+      "passed": 4,
+      "cases": 4,
+      "accuracy": 1
+    }
+  }
+}

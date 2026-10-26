@@ -26,7 +26,8 @@ class IntentParser:
         stop_words = {
             "what", "is", "the", "of", "and", "in", "on", "for", "a", "an", "at",
             "to", "how", "when", "where", "our", "all", "out", "by", "from", "with",
-            "find", "specs", "specs"
+            "find", "specs", "are", "does", "do", "please", "show", "give", "me",
+            "tell", "can", "you", "current", "latest"
         }
         keywords = [
             w.lower().rstrip(".") for w in words
@@ -42,13 +43,49 @@ class IntentParser:
             target_attr = "version"
         elif any(k in lower_q for k in ["price", "cost", "fee", "usd", "$"]):
             target_attr = "price"
+        elif any(k in lower_q for k in ["phone", "telephone", "call"]):
+            target_attr = "phone"
+        elif any(k in lower_q for k in ["email", "e-mail"]):
+            target_attr = "email"
+        elif any(k in lower_q for k in ["opening hours", "business hours", "what time", "when open", "closing"]):
+            target_attr = "hours"
+        elif any(k in lower_q for k in ["how many", "number of", "count of"]):
+            target_attr = "number"
+        elif any(k in lower_q for k in [
+            "lead time", "delivery time", "shipping time", "turnaround",
+            "warranty", "duration", "how long"
+        ]):
+            target_attr = "duration"
+        elif any(k in lower_q for k in ["percentage", "percent", "utilization", "efficiency", "rate"]):
+            target_attr = "percentage"
         elif any(k in lower_q for k in ["who", "founder", "author", "creator", "ceo"]):
             target_attr = "person"
-        elif any(k in lower_q for k in ["specification", "specs", "ram", "memory", "tflops"]):
+        elif any(k in lower_q for k in [
+            "specification", "specs", "ram", "memory", "tflops", "capacity",
+            "temperature", "voltage", "current", "power", "weight", "dimension",
+            "length", "width", "height", "latency", "bandwidth", "speed", "frequency",
+            "storage", "size"
+        ]):
             target_attr = "technical_spec"
 
-        # Extract candidate target entity
-        target_entity = keywords[0] if keywords else "unknown_entity"
+        # Prefer a likely entity token over attribute/control words.
+        attribute_words = {
+            "price", "cost", "fee", "usd", "version", "release", "date",
+            "current", "latest", "phone", "telephone", "email", "hours",
+            "opening", "closing", "number", "count", "specification", "technical", "memory",
+            "ram", "author", "founder", "creator", "ceo", "lead", "delivery",
+            "shipping", "turnaround", "warranty", "duration", "percentage",
+            "percent", "utilization", "efficiency", "rate", "temperature",
+            "voltage", "current", "power", "weight", "dimension", "length",
+            "width", "height", "latency", "bandwidth", "speed", "frequency",
+            "storage", "size",
+        }
+        entity_candidates = [kw for kw in keywords if kw not in attribute_words]
+        target_entity = (
+            entity_candidates[0]
+            if entity_candidates
+            else (keywords[0] if keywords else "unknown_entity")
+        )
 
         return ParsedIntent(
             raw_query=cleaned_query,

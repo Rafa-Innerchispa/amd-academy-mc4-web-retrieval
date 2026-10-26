@@ -1,16 +1,56 @@
-import os
+from typing import List
+
 from pydantic import BaseModel, Field
+
 
 class AgentConfig(BaseModel):
     max_navigation_hops: int = Field(default=5, description="Maximum navigation steps before terminating")
     request_timeout_seconds: float = Field(default=15.0, description="HTTP request timeout per step")
-    max_dom_char_length: int = Field(default=100000, description="Truncation limit for raw DOM extraction")
-    verification_threshold: float = Field(default=0.85, description="Minimum confidence for fuzzy match verification")
+    total_budget_seconds: float = Field(default=24.0, description="Engineering wall-clock budget for one retrieval; adapter may override when official limits are known")
+    max_dom_char_length: int = Field(default=100000, description="Truncation limit for DOM extraction")
+    verification_threshold: float = Field(default=0.85, description="Minimum confidence for fuzzy grounding")
+    max_candidates_per_page: int = Field(default=8, description="Maximum ranked candidates verified per page")
+    min_candidate_score: float = Field(default=2.0, description="Minimum contextual relevance score before accepting a candidate")
+    reranker_margin_threshold: float = Field(
+        default=0.75,
+        ge=0.0,
+        description="Invoke an optional local reranker only when top candidate scores are this close or closer.",
+    )
     user_agent: str = Field(
-        default="AMDAILeague-MC4-WebRetrievalAgent/0.1 (+https://github.com/Rafa-Innerchispa)",
-        description="Polite crawler user-agent header"
+        default="InnerOS-AMD-MC4-WebRetrieval/0.2 (+https://github.com/Rafa-Innerchispa)",
+        description="Polite crawler user-agent header",
     )
     rocm_device_id: int = Field(default=0, description="Target AMD GPU device index")
-    allow_external_domains: bool = Field(default=False, description="Strict domain lock to prevent crawling the wild web")
+    allow_external_domains: bool = Field(
+        default=False,
+        description="Allow navigation outside the seed domain. Disabled by default.",
+    )
+    enable_public_search: bool = Field(
+        default=False,
+        description="Enable keyless public-web discovery when no starting URL is supplied.",
+    )
+    search_endpoint: str = Field(
+        default="https://html.duckduckgo.com/html/",
+        description="Search endpoint used only when public search is explicitly enabled.",
+    )
+    search_timeout_seconds: float = Field(
+        default=8.0,
+        description="Timeout for optional public search discovery.",
+    )
+    search_max_results: int = Field(
+        default=5,
+        ge=1,
+        le=10,
+        description="Maximum discovery results considered before retrieval.",
+    )
+    allow_private_network_targets: bool = Field(
+        default=False,
+        description="Permit private/internal network targets. Keep false for normal web use.",
+    )
+    allowed_private_hosts: List[str] = Field(
+        default_factory=list,
+        description="Explicit private/internal hosts allowed by an official grader adapter.",
+    )
+
 
 DEFAULT_CONFIG = AgentConfig()

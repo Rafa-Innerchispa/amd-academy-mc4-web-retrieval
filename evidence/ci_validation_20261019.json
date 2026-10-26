@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-10-19T20:54:18Z",
+  "validated_source_sha": "662947f118fb46aad3e83223127b539ce973c034",
+  "github_actions_run_id": 39323157430,
+  "workflow": "Match 4 Python validation",
+  "conclusion": "success",
+  "compileall": "PASS",
+  "pytest": {
+    "passed": 52,
+    "failed": 0,
+    "duration_seconds": 0.4
+  },
+  "offline_benchmark": {
+    "cases": 12,
+    "passed": 12,
+    "failed": 0,
+    "exact_case_accuracy": 1,
+    "mocked_latency_ms_p50": 0.98,
+    "mocked_latency_ms_p95": 1.515
+  },
+  "container_smoke": "PASS",
+  "evidence_boundary": "CI/local-fixture functional evidence only; not AMD GPU performance and not an official LabLab Match 4 grader score."
+}

@@ -53,5 +53,23 @@ class FailClosedVerifier:
                     )
                     return VerificationStatus.VERIFIED, provenance
 
-        # Step 3: FAIL-CLOSED REJECTION
+        # Step 3: Raw HTML grounding for structured data such as JSON-LD.
+        normalized_raw = snapshot.raw_html.lower()
+        raw_idx = normalized_raw.find(normalized_answer)
+        if raw_idx != -1:
+            verbatim_excerpt = snapshot.raw_html[
+                raw_idx:raw_idx + len(candidate_answer)
+            ]
+            provenance = ProvenanceRecord(
+                snapshot_hash=snapshot.content_hash,
+                source_url=snapshot.url,
+                char_offset_start=raw_idx,
+                char_offset_end=raw_idx + len(candidate_answer),
+                verbatim_text=verbatim_excerpt,
+                timestamp_utc=snapshot.timestamp_utc,
+                coordinate_space="raw_html",
+            )
+            return VerificationStatus.VERIFIED, provenance
+
+        # Step 4: FAIL-CLOSED REJECTION
         return VerificationStatus.REJECTED_UNVERIFIED, None

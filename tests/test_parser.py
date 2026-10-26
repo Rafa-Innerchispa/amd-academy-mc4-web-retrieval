@@ -17,3 +17,11 @@ def test_intent_parser_with_explicit_seed():
     assert intent.inferred_seed_url == "https://www.amd.com/en/products/accelerators/instinct.html"
     assert intent.target_attribute == "technical_spec"
     assert "instinct" in intent.keywords
+
+
+def test_entity_prefers_subject_over_requested_attribute():
+    intent = IntentParser().parse(
+        "What is the price of the R9700 workstation?",
+        explicit_seed_url="https://example.com/products",
+    )
+    assert intent.target_entity == "r9700"
