@@ -1,6 +1,14 @@
-# LabLab Submission Draft — AMD AI League Match 4
+# LabLab Submission — AMD AI League Match 4
 
-> Draft prepared early so publication becomes a copy/paste operation once LabLab exposes the Match 4 submission route and the official grader artifact is verified.
+Updated: 2026-10-26
+
+## Publication state
+
+**General LabLab project publication: READY**
+
+**Official Mini-Challenge 4 evaluator/image submission: NOT PUBLICLY AVAILABLE YET**
+
+The public AMD AI League dashboard still exposes official evaluator results for MC2 and MC3 only. This document is ready for the general project page now and must not be presented as an official MC4 grading receipt.
 
 ## Project name
 
@@ -10,32 +18,62 @@
 
 A bounded, evidence-first web retrieval agent that navigates sites, extracts the exact requested value, verifies it against source content, and fails closed when the evidence is insufficient.
 
-## Description
+## Short description
+
+InnerOS Verified Web Retrieval converts natural-language requests into exact, source-backed answers. It combines deterministic intent parsing, bounded web navigation, structured extraction and strict verification, returning an answer only when the cited page proves it.
+
+## Full description
 
 InnerOS Verified Web Retrieval is our AMD AI League Match 4 implementation for Intelligent Web Information Retrieval.
 
-The agent accepts a natural-language request and a starting web location, navigates within a bounded budget, extracts structured and unstructured candidate values, and returns only evidence-backed information.
+The agent accepts a natural-language request and a starting web location, navigates within a bounded budget, extracts candidate values from structured and unstructured content, and emits only evidence-backed information.
 
-The retrieval core is deliberately deterministic where possible:
+Core capabilities:
 
 - exact-value extraction for prices, dates, versions, contacts, opening hours, counts, people and technical specifications;
-- structured parsing of HTML tables and JSON-LD;
-- bounded navigation with loop prevention and anchor-aware link ranking;
-- provenance for every accepted answer;
-- fail-closed behavior when evidence cannot support the requested fact;
-- redirect and network-target safety controls;
-- configurable support for official internal grader hosts without weakening normal web defaults;
-- atomic output so interrupted requests are less likely to leave malformed JSON.
+- HTML table, JSON-LD and raw JSON/API extraction;
+- bounded best-first navigation with loop prevention and dead-end backtracking;
+- anchor-aware link ranking and pagination;
+- exact source URL plus SHA-256 provenance;
+- fail-closed behavior when the evidence cannot support the requested answer;
+- prompt-injection rejection for untrusted page content;
+- SSRF, private-address and redirect-escape protections;
+- atomic, path-safe grader output;
+- an optional ambiguity gate for a local grounded reranker without allowing the model to invent new values.
 
-A separate demo interface makes the capability easy to use and inspect, while the graded container remains isolated and minimal.
-
-The project is local-first and designed for AMD ROCm. The final Match 4 Docker artifact will use the official challenge contract and will only be published after AMD hardware, resource, timing and anonymous-pull validation.
+The implementation is local-first and has no paid external inference dependency. The production AMD host now runs ROCm 10.1 on a Radeon AI PRO R9700, while the challenge-container adapter remains isolated so it can be narrowed to the exact official grader contract when AMD/LabLab publishes it.
 
 ## Why AMD
 
-The challenge artifact follows the AMD AI League container pattern: AMD ROCm runtime, GPU-oriented execution, reproducible local processing, no paid external inference dependency, and strict evidence-driven behavior.
+The project uses AMD as a real local execution platform, not merely a logo in a slide deck:
 
-The broader InnerOS architecture uses AMD hardware as a local execution layer for governed agent workflows. Match 4 validates web retrieval as another independently testable capability before promotion into the wider platform.
+- AMD Radeon AI PRO R9700 (`gfx1201`);
+- ROCm 10.1 production runtime;
+- PyTorch 2.13.0+rocm10.1.0;
+- vLLM 0.29.1 development runtime;
+- Qwen3-Coder 30B AWQ available locally for selective semantic reasoning;
+- deterministic retrieval remains the fast baseline, avoiding unnecessary GPU use for facts already present in tables or JSON.
+
+This design combines exact extraction speed with optional AMD-accelerated reasoning only for genuinely ambiguous cases.
+
+## Current verification
+
+Physical AMD-host validation on 2026-10-26:
+
+- pytest: **74/74 PASS**
+- core benchmark: **16/16 PASS**
+- core exact-case accuracy: **1.0**
+- core p50 / p95: **1.707 / 4.754 ms**
+- competitive adversarial benchmark: **30/30 PASS**
+- competitive exact-case accuracy: **1.0**
+- competitive p50 / p95: **1.186 / 2.763 ms**
+- live ROCm 10.1 runtime probe: **ROCM101_OK**
+
+Evidence:
+
+`docs/evidence/amd_rocm101_host_validation_20261026.json`
+
+These are deterministic engineering benchmarks. They are not an official AMD grader score and are not directly comparable with competitors using different private datasets.
 
 ## Key technologies
 
@@ -43,27 +81,29 @@ The broader InnerOS architecture uses AMD hardware as a local execution layer fo
 - AMD Radeon AI PRO R9700
 - Python
 - Docker
+- Qwen3-Coder
 - BeautifulSoup
 - Requests
-- structured web extraction
 - JSON-LD
-- evidence provenance
 - bounded agent navigation
+- evidence provenance
 - InnerOS
 
-## GitHub
-
-Repository:
+## Repository
 
 https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval
 
-Development branch:
+Active development branch:
 
 `chatgpt/mc4-core-20261019`
 
+Draft PR:
+
+https://github.com/Rafa-Innerchispa/amd-academy-mc4-web-retrieval/pull/2
+
 ## Docker image
 
-**PLANNED FINAL URI — NOT YET PUBLISHED**
+Reserved final URI, not yet published:
 
 `us-central1-docker.pkg.dev/innerops-agentic-platform/amd-academy-public/amd-academy-mc4-web-retrieval:mc4-final`
 
@@ -71,28 +111,6 @@ Digest:
 
 `PENDING_OFFICIAL_MC4_CONTRACT_AND_FINAL_BUILD`
 
-## Current verification
-
-Local functional evidence:
-
-- **40 tests passed**
-- Python compileall: **PASS**
-- offline benchmark: **9/9 PASS**
-- lightweight container packaging smoke: **PASS** (GitHub Actions run 39315320387, network disabled, fail-closed adapter output, no demo TCP port)
-
-- exact-case accuracy: **1.0**
-- bounded navigation: PASS
-- fail-closed grounding: PASS
-- JSON-LD extraction + raw-HTML grounding: PASS
-- HTML table extraction: PASS
-- anchor-aware multi-hop navigation: PASS
-- private-network blocking by default: PASS
-- redirect-to-private-target blocking: PASS
-- explicit internal grader-host allowlisting: PASS
-- atomic output: PASS
-
-These are CI functional results only. Final AMD GPU, Docker size, VRAM, runtime timing, official sample/selfcheck, public pull and immutable digest remain pending.
-
 ## Submission truth boundary
 
-This draft does not claim the Docker image is final or publicly available. Match 4-specific grader invocation/output requirements remain intentionally unfrozen until AMD/LabLab publishes the official contract.
+The project page can be published now. Do not claim that the Docker image has been submitted to an official MC4 evaluator until LabLab exposes the route and the final image passes the official contract, anonymous pull and AMD re-run gates.
