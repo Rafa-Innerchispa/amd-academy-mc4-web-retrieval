@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r /app/requirements-runtime.txt
 
 COPY src/ /app/src/
 COPY app/app.py /app/app.py
-COPY tools/selfcheck_program_rules.py /app/tools/selfcheck_program_rules.py
+COPY app/ci_container_smoke.py /app/ci_container_smoke.py
 
 RUN mkdir -p /app/output
 
