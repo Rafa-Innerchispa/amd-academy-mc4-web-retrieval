@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-10-26T17:51:36Z",
+  "observed_at": "2026-10-26T18:14:32Z",
   "host": "ralfiia-amd",
   "hardware": {
     "gpu": "AMD Radeon AI PRO R9700",
@@ -17,13 +17,15 @@
   },
   "host_resources": {
     "root_total_gib": 466,
-    "root_used_gib": 310,
-    "root_free_gib": 137,
-    "root_used_percent": 70,
-    "memory_total_gib": 30,
-    "memory_available_gib": 20,
-    "swap_total_gib": 15,
-    "swap_used_gib": 14
+    "root_used_gib": 314,
+    "root_free_gib": 132,
+    "root_used_percent": 71,
+    "data_total_tib": 1.8,
+    "data_used_gib": 497,
+    "data_free_tib": 1.3,
+    "data_used_percent": 29,
+    "docker_root_dir": "/home/rlopez/data/docker",
+    "memory_total_gib": 30
   },
   "match4_validation": {
     "source_sha_before_evidence_updates": "0f6ace630332cd75c48d16972bde8c8fcb9d53b8",
@@ -60,6 +62,11 @@
     "network_none_smoke": "PASS",
     "agent_import": "PASS",
     "exposed_ports": null,
+    "timing_runs": 5,
+    "warmup_p50_ms": 2502.873,
+    "warmup_p95_ms": 2582.406,
+    "fail_closed_query_p50_ms": 2571.111,
+    "fail_closed_query_p95_ms": 3046.837,
     "published": false
   },
   "lablab_public_release_state": {
@@ -72,7 +79,7 @@
   "truth_boundary": {
     "rocm101_production_runtime_verified": true,
     "match4_source_and_synthetic_benchmarks_verified_on_amd_host": true,
-    "rocm101_engineering_container_built_and_smoked": true,
+    "rocm101_engineering_container_built_smoked_and_timed": true,
     "final_match4_docker_image_built": false,
     "official_match4_contract_recovered": false,
     "official_match4_grader_score": null,
